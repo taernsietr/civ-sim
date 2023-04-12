@@ -6,4 +6,5 @@ edition = "2021"
 [dependencies]
 nannou = "0.18.1"
 noise = "0.8.2"
+num = "0.4.0"
 rand = "0.8.5"
