@@ -1,8 +1,6 @@
 use rand::Rng;
 use noise::{RidgedMulti, Perlin, NoiseFn, Seedable};
 
-const PERLIN_FACTOR: f64 = 0.92731;
-const PERLIN_OFFSET: f64 = 0.00005;
 
 #[derive(Debug)]
 enum Biome {
@@ -14,7 +12,7 @@ struct Tile {
     x: u32,
     y: u32,
     biome: Option<Biome>,
-    height: u8,
+    altitude: u8,
     temperature: u8,
     humidity: u8,
     vegetation: u8,
@@ -38,6 +36,21 @@ impl Tile {
     fn calculate_biome(&mut self) {
         self.biome = Some(Biome::Grassland);
     }
+
+    fn position_seed(x: u32, y: u32) -> [f64; 2] {
+        const PERLIN_FACTOR: f64 = 0.92731;
+        const PERLIN_OFFSET: f64 = 0.00005;
+
+        [
+            (x as f64 / PERLIN_FACTOR) + PERLIN_OFFSET,
+            (y as f64 / PERLIN_OFFSET) + PERLIN_OFFSET
+        ]
+    }
+}
+
+// Scales a f64 within [-1.0, 1.0] to a u8 within [0, 255]
+fn perlin_to_u8(input: f64) -> u8 {
+    (((input + 1.0) / 2.0) * 255.0) as u8
 }
 
 impl World {
@@ -50,12 +63,12 @@ impl World {
             for y in 0..parameters.height {
                 let mut tile = Tile {
                     x, y, biome: None,
-                    height:      (((noise.get([(x as f64 / PERLIN_FACTOR) + PERLIN_OFFSET, (y as f64 / PERLIN_OFFSET) + PERLIN_OFFSET]) + 1.0) / 2.0) * 255.0) as u8,
-                    temperature: (((noise.get([(x as f64 / PERLIN_FACTOR) + PERLIN_OFFSET, (y as f64 / PERLIN_OFFSET) + PERLIN_OFFSET]) + 1.0) / 2.0) * 255.0) as u8,
-                    humidity:    (((noise.get([(x as f64 / PERLIN_FACTOR) + PERLIN_OFFSET, (y as f64 / PERLIN_OFFSET) + PERLIN_OFFSET]) + 1.0) / 2.0) * 255.0) as u8,
-                    vegetation:  (((noise.get([(x as f64 / PERLIN_FACTOR) + PERLIN_OFFSET, (y as f64 / PERLIN_OFFSET) + PERLIN_OFFSET]) + 1.0) / 2.0) * 255.0) as u8,
-                    hardness:    (((noise.get([(x as f64 / PERLIN_FACTOR) + PERLIN_OFFSET, (y as f64 / PERLIN_OFFSET) + PERLIN_OFFSET]) + 1.0) / 2.0) * 255.0) as u8,
-                    sunlight:    (((noise.get([(x as f64 / PERLIN_FACTOR) + PERLIN_OFFSET, (y as f64 / PERLIN_OFFSET) + PERLIN_OFFSET]) + 1.0) / 2.0) * 255.0) as u8
+                    altitude:    perlin_to_u8(noise.get(Tile::position_seed(x, y))),
+                    temperature: perlin_to_u8(noise.get(Tile::position_seed(x, y))),
+                    humidity:    perlin_to_u8(noise.get(Tile::position_seed(x, y))),
+                    vegetation:  perlin_to_u8(noise.get(Tile::position_seed(x, y))),
+                    hardness:    perlin_to_u8(noise.get(Tile::position_seed(x, y))),
+                    sunlight:    perlin_to_u8(noise.get(Tile::position_seed(x, y)))
                 };
                 tile.calculate_biome();
                 tiles.push(tile);
