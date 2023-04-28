@@ -25,5 +25,10 @@ fn main() {
     let args = Args::parse();
     let parameters = WorldCreationParameters { dimensions: (args.x, args.y) };
     let world = World::new(parameters);
-    rgb_image(world, VisualizationMode::Biome, Some(args.file));
+    
+    for tile in &world.tiles {
+        println!("({},{}): {}", tile.x, tile.y, tile.altitude);
+    }
+
+    rgb_image(world, VisualizationMode::Altitude, Some(args.file));
 }

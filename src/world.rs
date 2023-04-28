@@ -1,5 +1,5 @@
 use rand::Rng;
-use noise::{OpenSimplex, NoiseFn, Seedable};
+use noise::{NoiseFn, Seedable};
 
 use crate::tile::Tile;
 
@@ -21,11 +21,11 @@ impl World {
         let mut rng = rand::thread_rng();
 
         // let rotation_angle = rng.gen::<u8>();
-        let noise = OpenSimplex::new(rng.gen::<u32>());
+        let noise = noise::Worley::new(rng.gen::<u32>());
 
         for x in 0..parameters.dimensions.0 {
             for y in 0..parameters.dimensions.1 {
-                let tile = Tile::new(x, y, noise);
+                let tile = Tile::new(x, y, &noise);
                 tiles.push(tile);
             }
         }

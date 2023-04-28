@@ -11,7 +11,7 @@ enum Biome {
 pub struct Tile {
     pub x: u32,
     pub y: u32,
-    pub altitude: u8,
+    pub altitude: f32,
     pub temperature: u8,
     pub humidity: u8,
     pub vegetation: u8,
@@ -24,7 +24,8 @@ impl Tile {
     pub fn new(x: u32, y: u32, noise: impl NoiseFn<f64, 2>) -> Tile {
         let mut tile = Tile {
             x, y, biome: None,
-            altitude: scale_f64_to_u8(noise.get(Tile::sample_noise(x, y, 0.0, 1000.0))),
+            // altitude: scale_f64_to_u8(noise.get(Tile::sample_noise(x, y, 1.0, 1.0))),
+            altitude: noise.get(Tile::sample_noise(x, y, 0.1, 12342.0)) as f32,
             hardness: 127,
             temperature: 127,
             humidity: 127,
