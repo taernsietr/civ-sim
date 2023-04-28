@@ -1,3 +1,14 @@
+## Ideas
+
+- Progress bar for generation
+- Knobs file (for controlling parameters)
+- Add better command line argument controls
+- Multiple algorithms to determine different world features?
+- Post-noise-based generation processing and feature adding
+- Voronoi division for area desirability? (greater concentration of cells in more
+- desirable zones)
+- Add diferent visualizations based on arguments (e.g. greyscale, height-only)
+
 ## Person
 - ID
 - Name (main language)
