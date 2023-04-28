@@ -21,7 +21,7 @@ impl World {
         let mut rng = rand::thread_rng();
 
         // let rotation_angle = rng.gen::<u8>();
-        let noise = noise::Worley::new(rng.gen::<u32>());
+            let noise = noise::OpenSimplex::new(rng.gen::<u32>());
 
         for x in 0..parameters.dimensions.0 {
             for y in 0..parameters.dimensions.1 {
