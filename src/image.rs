@@ -1,4 +1,4 @@
-use image::{RgbImage, Rgb, Rgb32FImage};
+use image::{RgbImage, Rgb};
 use image::ColorType::Rgb8;
 
 use crate::world::World;
@@ -24,7 +24,7 @@ pub fn rgb_image(world: &World, mode: VisualizationMode, file_name: String) {
     }
     _ = image::save_buffer(&file_name, &img, world.width, world.height, Rgb8);
     // _ = image::save_buffer(file_name, &img, world.width, world.height, Rgb8);
-    println!("Writing image to file {}", &file_name);
+    println!("[MapGen] Writing image to file {}", &file_name);
 }
 
 impl Tile {

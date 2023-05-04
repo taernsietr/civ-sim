@@ -31,10 +31,12 @@ fn main() {
         Some(name) => name,
         None => "test".to_string(),
     };
+
+    println!("[MapGen] We are attempting to generate {} images in {}x{}.", args.variations, args.x, args.y);
     
     let mut worlds = Vec::<World>::with_capacity(args.variations as usize);
     for _ in 0..args.variations {
-        worlds.push(World::new(&parameters));
+        worlds.push(World::new_mt(&parameters, 1));
     }
 
     for (i, world) in worlds.iter().enumerate() {
