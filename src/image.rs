@@ -15,20 +15,16 @@ pub enum VisualizationMode {
     Sunlight,
 }
 
-pub fn rgb_image(world: World, mode: VisualizationMode, name: Option<String>) {
-    let file_name: String = match name {
-        Some(name) => format!("./{}.png", name),
-        None => "./test.png".to_string(),
-    };
-
+pub fn rgb_image(world: &World, mode: VisualizationMode, file_name: String) {
     let mut img = RgbImage::new(world.width, world.height);
     // let mut img = Rgb32FImage::new(world.width, world.height);
 
     for tile in &world.tiles {
         img.put_pixel(tile.x, tile.y, tile.rgb(&mode))
     }
-    _ = image::save_buffer(file_name, &img, world.width, world.height, Rgb8);
+    _ = image::save_buffer(&file_name, &img, world.width, world.height, Rgb8);
     // _ = image::save_buffer(file_name, &img, world.width, world.height, Rgb8);
+    println!("Writing image to file {}", &file_name);
 }
 
 impl Tile {

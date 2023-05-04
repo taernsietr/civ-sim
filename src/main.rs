@@ -17,18 +17,27 @@ struct Args {
     #[arg(short, long, default_value_t = 256)]
     y: u32,
 
+    #[arg(short, long, default_value_t = 1)]
+    variations: u32,
+    
     #[arg(short, long)]
-    file: String,
+    file: Option<String>,
 }
 
 fn main() {
     let args = Args::parse();
     let parameters = WorldCreationParameters { dimensions: (args.x, args.y) };
-    let world = World::new(parameters);
+    let file_name: String = match args.file {
+        Some(name) => name,
+        None => "test".to_string(),
+    };
     
-    for tile in &world.tiles {
-        println!("({},{}): {}", tile.x, tile.y, tile.altitude);
+    let mut worlds = Vec::<World>::with_capacity(args.variations as usize);
+    for _ in 0..args.variations {
+        worlds.push(World::new(&parameters));
     }
 
-    rgb_image(world, VisualizationMode::Altitude, Some(args.file));
+    for (i, world) in worlds.iter().enumerate() {
+        rgb_image(world, VisualizationMode::Altitude, format!("./{}_{}.png", file_name, i));
+    }
 }

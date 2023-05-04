@@ -16,12 +16,12 @@ pub struct World {
 }
 
 impl World {
-    pub fn new(parameters: WorldCreationParameters) -> World {
+    pub fn new(parameters: &WorldCreationParameters) -> World {
         let mut tiles = Vec::with_capacity((parameters.dimensions.0 * parameters.dimensions.1) as usize);
         let mut rng = rand::thread_rng();
 
         // let rotation_angle = rng.gen::<u8>();
-            let noise = noise::OpenSimplex::new(rng.gen::<u32>());
+        let noise = noise::OpenSimplex::new(rng.gen::<u32>());
 
         for x in 0..parameters.dimensions.0 {
             for y in 0..parameters.dimensions.1 {
