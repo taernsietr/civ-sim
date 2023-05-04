@@ -36,7 +36,7 @@ fn main() {
     
     let mut worlds = Vec::<World>::with_capacity(args.variations as usize);
     for _ in 0..args.variations {
-        worlds.push(World::new_mt(&parameters, 1));
+        worlds.push(World::new_mt(&parameters));
     }
 
     for (i, world) in worlds.iter().enumerate() {

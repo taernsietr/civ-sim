@@ -37,22 +37,57 @@ impl World {
         }
     }
 
-    pub fn new_mt(parameters: &WorldCreationParameters, threads: u32) -> World {
+    pub fn new_mt(parameters: &WorldCreationParameters) -> World {
         let (width, height) = parameters.dimensions;
         let mut rng = rand::thread_rng();
         let noise = noise::OpenSimplex::new(rng.gen::<u32>());
-        let mut tiles = Vec::with_capacity((parameters.dimensions.0 * parameters.dimensions.1) as usize);
+        let size = (parameters.dimensions.0 * parameters.dimensions.1) as usize;
+        let mut tiles = Vec::with_capacity(size);
+
+        let mut part1 = Vec::with_capacity(size/4);
+        let mut part2 = Vec::with_capacity(size/4);
+        let mut part3 = Vec::with_capacity(size/4);
+        let mut part4 = Vec::with_capacity(size/4);
 
         std::thread::scope(|s| { 
             s.spawn(|| {
-                for x in 0..width {
-                    for y in 0..height {
+                for x in 0..width/2 {
+                    for y in 0..height/2 {
                         let tile = Tile::new(x, y, &noise);
-                        tiles.push(tile);
+                        part1.push(tile);
+                    }
+                }
+            });
+            s.spawn(|| {
+                for x in width/2..width {
+                    for y in 0..height/2 {
+                        let tile = Tile::new(x, y, &noise);
+                        part2.push(tile);
+                    }
+                }
+            });
+            s.spawn(|| {
+                for x in 0..width/2 {
+                    for y in height/2..height {
+                        let tile = Tile::new(x, y, &noise);
+                        part3.push(tile);
+                    }
+                }
+            });
+            s.spawn(|| {
+                for x in width/2..width {
+                    for y in height/2..height {
+                        let tile = Tile::new(x, y, &noise);
+                        part4.push(tile);
                     }
                 }
             });
         });
+
+        tiles.append(&mut part1);
+        tiles.append(&mut part2);
+        tiles.append(&mut part3);
+        tiles.append(&mut part4);
 
         World { 
             width: parameters.dimensions.0,
