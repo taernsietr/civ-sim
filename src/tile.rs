@@ -12,33 +12,34 @@ pub struct Tile {
     pub x: u32,
     pub y: u32,
     pub altitude: u8,
-    pub temperature: u8,
-    pub humidity: u8,
-    pub vegetation: u8,
-    pub hardness: u8,
-    pub sunlight: u8,
+    // pub temperature: u8,
+    // pub humidity: u8,
+    // pub vegetation: u8,
+    // pub hardness: u8,
+    // pub sunlight: u8,
     biome: Option<Biome>,
 }
 
 impl Tile {
     pub fn new(x: u32, y: u32, noise: impl NoiseFn<f64, 2>) -> Tile {
-        let a = scale_f64_to_u8(noise.get(Tile::sample_noise(x, y, 1.0, 3.0, 1000.0)));
-        let b = scale_f64_to_u8(noise.get(Tile::sample_noise(x, y, 1.0, 6.0, 1000.0)));
-        let c = scale_f64_to_u8(noise.get(Tile::sample_noise(x, y, 1.0, 9.0, 1000.0)));
-        let d = scale_f64_to_u8(noise.get(Tile::sample_noise(x, y, 1.0, 12.0, 1000.0)));
-        let e = scale_f64_to_u8(noise.get(Tile::sample_noise(x, y, 1.0, 15.0, 1000.0)));
+        let a = noise.get(Tile::sample_noise(x, y, 1.0, 1.0, 1.0));
+        let b = noise.get(Tile::sample_noise(x, y, 1.0, 1.0, 10.0));
+        let c = noise.get(Tile::sample_noise(x, y, 1.0, 1.0, 100.0));
+        let d = noise.get(Tile::sample_noise(x, y, 1.0, 1.0, 1000.0));
+        let e = noise.get(Tile::sample_noise(x, y, 1.0, 1.0, 10000.0));
         // let res = if a > 127 { b } else { 0 };
         // let res = a/24 + b/20 + c/16 + d/8 + e/4;
-        let res = a/5 + b/5 + c/5 + d/5 + e/5;
+        let res = scale_f64_to_u8((a + b + c + d + e) / 5.0);
+
+        // altitude: scale_f64_to_u8(noise.get(Tile::sample_noise(x, y, 1.0, 100.0))),
         let mut tile = Tile {
             x, y, biome: None,
-            // altitude: scale_f64_to_u8(noise.get(Tile::sample_noise(x, y, 1.0, 100.0))),
             altitude: res,
-            hardness: 127,
-            temperature: 127,
-            humidity: 127,
-            vegetation: 127,
-            sunlight: 127,
+            // hardness: 127,
+            // temperature: 127,
+            // humidity: 127,
+            // vegetation: 127,
+            // sunlight: 127,
         };
         tile.calculate_biome();
         tile

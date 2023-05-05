@@ -32,14 +32,15 @@ fn main() {
         None => "test".to_string(),
     };
 
-    println!("[MapGen] We are attempting to generate {} images in {}x{}.", args.variations, args.x, args.y);
+    println!("[MapGen] We are attempting to generate {} image(s) in {}x{}.", args.variations, args.x, args.y);
     
     let mut worlds = Vec::<World>::with_capacity(args.variations as usize);
-    for _ in 0..args.variations {
+    for i in 0..args.variations {
+        println!("[MapGen] Building world no. {}...", i);
         worlds.push(World::new_mt(&parameters));
     }
 
     for (i, world) in worlds.iter().enumerate() {
-        rgb_image(world, VisualizationMode::Altitude, format!("./{}_{}.png", file_name, i));
+        rgb_image(world, VisualizationMode::Biome, format!("./{}_{}.png", file_name, i));
     }
 }

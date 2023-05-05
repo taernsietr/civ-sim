@@ -16,6 +16,7 @@ pub struct World {
 }
 
 impl World {
+    #[allow(dead_code)]
     pub fn new(parameters: &WorldCreationParameters) -> World {
         let mut tiles = Vec::with_capacity((parameters.dimensions.0 * parameters.dimensions.1) as usize);
         let mut rng = rand::thread_rng();
@@ -44,6 +45,7 @@ impl World {
         let size = (parameters.dimensions.0 * parameters.dimensions.1) as usize;
         let mut tiles = Vec::with_capacity(size);
 
+        // TODO: Write this properly, maybe scaling with available CPU cores?
         let mut part1 = Vec::with_capacity(size/4);
         let mut part2 = Vec::with_capacity(size/4);
         let mut part3 = Vec::with_capacity(size/4);
