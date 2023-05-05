@@ -1,4 +1,3 @@
-use std::fs::File;
 use image::{RgbImage, Rgb};
 use image::ColorType::Rgb8;
 
@@ -17,20 +16,26 @@ pub enum VisualizationMode {
 }
 
 pub fn rgb_image(world: &World, mode: VisualizationMode, file_name: String, debug: bool) {
-    let mut log_file = File::create(format!("{}.log", file_name));
+    let mut log = String::new();
     let mut img = RgbImage::new(world.width, world.height);
-    // let mut img = Rgb32FImage::new(world.width, world.height);
 
     for tile in &world.tiles {
         img.put_pixel(tile.x, tile.y, tile.rgb(&mode));
         if debug {
             let r = tile.rgb(&mode).0[0];
-            file.write!("{} {} {}", r, g, b)
+            let g = tile.rgb(&mode).0[1];
+            let b = tile.rgb(&mode).0[2];
+            log.push_str(&format!("{} {} {}\n", r, g, b));
         };
     }
-    _ = image::save_buffer(&file_name, &img, world.width, world.height, Rgb8);
+    _ = image::save_buffer(format!("./images/{}.png", file_name), &img, world.width, world.height, Rgb8);
     // _ = image::save_buffer(file_name, &img, world.width, world.height, Rgb8);
     println!("[MapGen] Writing image to file {}", &file_name);
+    if debug {
+        let log_file: String = format!("./logs/{}.log", file_name);
+        std::fs::write(log_file, log).unwrap();
+        println!("[MapGen] Writing log to file {}", &file_name);
+    }
 }
 
 impl Tile {

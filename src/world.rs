@@ -16,34 +16,14 @@ pub struct World {
 }
 
 impl World {
-    #[allow(dead_code)]
     pub fn new(parameters: &WorldCreationParameters) -> World {
-        let mut tiles = Vec::with_capacity((parameters.dimensions.0 * parameters.dimensions.1) as usize);
-        let mut rng = rand::thread_rng();
-        let noise = noise::OpenSimplex::new(rng.gen::<u32>());
-        // let rotation_angle = rng.gen::<u8>();
-
-        for x in 0..parameters.dimensions.0 {
-            for y in 0..parameters.dimensions.1 {
-                let tile = Tile::new(x, y, &noise);
-                tiles.push(tile);
-            }
-        }
-
-        World { 
-            width: parameters.dimensions.0,
-            height: parameters.dimensions.1,
-            rotation_angle: 0,
-            tiles,
-        }
-    }
-
-    pub fn new_mt(parameters: &WorldCreationParameters) -> World {
         let (width, height) = parameters.dimensions;
-        let mut rng = rand::thread_rng();
-        let noise = noise::OpenSimplex::new(rng.gen::<u32>());
-        let size = (parameters.dimensions.0 * parameters.dimensions.1) as usize;
+        let size = (width * height) as usize;
         let mut tiles = Vec::with_capacity(size);
+        let mut rng = rand::thread_rng();
+        let seed = rng.gen::<u32>();
+        let noise = noise::OpenSimplex::new(seed);
+        println!("[MapGen] Using seed [{}]", &seed);
 
         // TODO: Write this properly, maybe scaling with available CPU cores?
         let mut part1 = Vec::with_capacity(size/4);

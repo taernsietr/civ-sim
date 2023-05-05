@@ -22,6 +22,9 @@ struct Args {
     
     #[arg(short, long)]
     file: Option<String>,
+
+    #[arg(short, long, default_value_t = false)]
+    debug: bool,
 }
 
 fn main() {
@@ -32,15 +35,16 @@ fn main() {
         None => "test".to_string(),
     };
 
+    if args.debug { println!("[MapGen] Running with debug on; logs will be generated"); };
     println!("[MapGen] We are attempting to generate {} image(s) in {}x{}.", args.variations, args.x, args.y);
     
     let mut worlds = Vec::<World>::with_capacity(args.variations as usize);
     for i in 0..args.variations {
         println!("[MapGen] Building world no. {}...", i);
-        worlds.push(World::new_mt(&parameters));
+        worlds.push(World::new(&parameters));
     }
 
     for (i, world) in worlds.iter().enumerate() {
-        rgb_image(world, VisualizationMode::Biome, format!("./{}_{}.png", file_name, i));
+        rgb_image(world, VisualizationMode::Biome, format!("{}_{}", file_name, i), args.debug);
     }
 }
