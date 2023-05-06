@@ -1,6 +1,6 @@
 use noise::NoiseFn;
 
-struct NoiseSampler<'a> {
+pub struct NoiseSampler<'a> {
     xoff: f64,
     yoff: Option<f64>,
     zoff: Option<f64>,
@@ -12,7 +12,7 @@ struct NoiseSampler<'a> {
 }
 
 impl<'a> NoiseSampler<'a> {
-    pub fn build_samplers(values: Vec<(f64, Option<f64>, Option<f64>, f64, Option<f64>, Option<f64>, f64, &dyn NoiseFn<f64, 3>)>) -> Vec<NoiseSampler> {
+    pub fn build_samplers(values: Vec<(f64, Option<f64>, Option<f64>, f64, Option<f64>, Option<f64>, f64, &'a impl NoiseFn<f64, 3>)>) -> Vec<NoiseSampler<'a>> {
         let mut samplers = Vec::new();
         for i in values { samplers.push(
             NoiseSampler { 

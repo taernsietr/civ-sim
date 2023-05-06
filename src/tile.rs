@@ -1,5 +1,6 @@
 use noise::NoiseFn;
 
+use crate::noise_sampler::NoiseSampler;
 use crate::helpers::scale_f64_to_u8;
 
 #[derive(Debug)]
@@ -21,14 +22,13 @@ pub struct Tile {
 }
 
 impl Tile {
-    pub fn new(x: u32, y: u32, noise: impl NoiseFn<f64, 2>) -> Tile {
-        let a = noise.get(Tile::sample_noise(x, y, 1.0, 1.0, 1.0));
-        let b = noise.get(Tile::sample_noise(x, y, 1.0, 1.0, 10.0));
-        let c = noise.get(Tile::sample_noise(x, y, 1.0, 1.0, 100.0));
-        let d = noise.get(Tile::sample_noise(x, y, 1.0, 1.0, 1000.0));
-        let e = noise.get(Tile::sample_noise(x, y, 1.0, 1.0, 10000.0));
+    pub fn new<'a>(x: u32, y: u32, noise_map: &'a impl NoiseFn<f64, 3>) -> Tile {
+        let values = vec!(
+            (0.0f64, Some(0.0f64), Some(0.0f64), 100.0f64, Some(100.0f64), Some(100.0f64), 1.0f64, noise_map),
+        );
+        let samplers = NoiseSampler::build_samplers(values);
 
-        let res = scale_f64_to_u8((a + b + c + d + e) / 5.0);
+        let res = scale_f64_to_u8(NoiseSampler::get_point_value(x, Some(y), None, samplers));
 
         let mut tile = Tile {
             x, y, biome: None,
