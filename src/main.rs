@@ -7,6 +7,7 @@ mod tile;
 mod world;
 mod helpers;
 mod image;
+mod noise_sampler;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -25,11 +26,14 @@ struct Args {
 
     #[arg(short, long, default_value_t = false)]
     debug: bool,
+
+    #[arg(short, long)]
+    seed: Option<u32>,
 }
 
 fn main() {
     let args = Args::parse();
-    let parameters = WorldCreationParameters { dimensions: (args.x, args.y) };
+    let parameters = WorldCreationParameters { dimensions: (args.x, args.y), seed: Some(37263) };
     let file_name: String = match args.file {
         Some(name) => name,
         None => "test".to_string(),

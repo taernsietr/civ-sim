@@ -27,11 +27,9 @@ impl Tile {
         let c = noise.get(Tile::sample_noise(x, y, 1.0, 1.0, 100.0));
         let d = noise.get(Tile::sample_noise(x, y, 1.0, 1.0, 1000.0));
         let e = noise.get(Tile::sample_noise(x, y, 1.0, 1.0, 10000.0));
-        // let res = if a > 127 { b } else { 0 };
-        // let res = a/24 + b/20 + c/16 + d/8 + e/4;
+
         let res = scale_f64_to_u8((a + b + c + d + e) / 5.0);
 
-        // altitude: scale_f64_to_u8(noise.get(Tile::sample_noise(x, y, 1.0, 100.0))),
         let mut tile = Tile {
             x, y, biome: None,
             altitude: res,

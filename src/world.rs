@@ -4,7 +4,8 @@ use rand::Rng;
 use crate::tile::Tile;
 
 pub struct WorldCreationParameters {
-    pub dimensions: (u32, u32)
+    pub dimensions: (u32, u32),
+    pub seed: Option<u32>,
 }
 
 #[derive(Debug)]
@@ -17,6 +18,7 @@ pub struct World {
 
 impl World {
     pub fn new(parameters: &WorldCreationParameters) -> World {
+        // TODO: add seed branch
         let (width, height) = parameters.dimensions;
         let size = (width * height) as usize;
         let mut tiles = Vec::with_capacity(size);
