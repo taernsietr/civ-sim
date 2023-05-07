@@ -1,7 +1,8 @@
 use clap::Parser;
+use rand::Rng;
 
-use crate::world::{WorldCreationParameters, World};
-use crate::image::{VisualizationMode, rgb_image};
+use crate::world::World;
+use crate::image::{VisualizationMode, save_image};
 use crate::cli::Args;
 
 mod cli;
@@ -13,22 +14,23 @@ mod world;
 
 fn main() {
     let args = Args::parse();
-    let parameters = WorldCreationParameters { dimensions: (args.x, args.y), seed: args.seed };
-    let file_name: String = match args.file {
-        Some(name) => name,
-        None => "test".to_string(),
-    };
 
+    println!("[MapGen] We are attempting to generate {} map(s) in {} x {}.", args.variations, args.x, args.y);
     if args.debug { println!("[MapGen] Running with debug on; logs will be generated"); };
-    println!("[MapGen] We are attempting to generate {} image(s) in {} x {}.", args.variations, args.x, args.y);
-    
     let mut worlds = Vec::<World>::with_capacity(args.variations as usize);
+    let mut rng = rand::thread_rng();
+    
     for i in 0..args.variations {
-        println!("[MapGen] Building world no. {}...", i);
-        worlds.push(World::new(&parameters));
+        let seed = if args.seed.is_none() { 
+            rng.gen::<u32>()
+        } else { 
+            args.seed.unwrap()
+        };
+        println!("[MapGen] Building world no. {} using seed [{}]...", i, &seed);
+        worlds.push(World::new(seed, (args.x, args.y)));
     }
 
-    for (i, world) in worlds.iter().enumerate() {
-        rgb_image(world, VisualizationMode::Biome, format!("{}_{}", file_name, i), args.debug);
+    for world in worlds {
+        save_image(&world, VisualizationMode::Biome, &args.file, args.debug);
     }
 }

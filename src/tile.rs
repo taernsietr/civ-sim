@@ -23,29 +23,24 @@ pub struct Tile {
 
 impl Tile {
     // TODO: enable different types of noise to be used
-    pub fn new<'a>(x: u32, y: u32, noise_map: &'a impl NoiseFn<f64, 3>) -> Tile {
+    pub fn new(x: u32, y: u32, noise_map: &impl NoiseFn<f64, 3>) -> Tile {
         let values = vec!(
-            (0.0, Some(0.0), Some(0.0), 00010.0, Some(00010.0), Some(00010.0), 2.0, noise_map),
-            (0.0, Some(0.0), Some(0.0), 00100.0, Some(00100.0), Some(00100.0), 4.0, noise_map),
-            (0.0, Some(0.0), Some(0.0), 01000.0, Some(01000.0), Some(01000.0), 8.0, noise_map),
-            (0.0, Some(0.0), Some(0.0), 10000.0, Some(10000.0), Some(10000.0), 24.0, noise_map),
+            (0.0, Some(0.0), Some(0.0), 0050.0, Some(0050.0), Some(0050.0), 2.0, noise_map),
+            (0.0, Some(0.0), Some(0.0), 0100.0, Some(0100.0), Some(0100.0), 2.0, noise_map),
+            (0.0, Some(0.0), Some(0.0), 0250.0, Some(0250.0), Some(0250.0), 2.0, noise_map),
+            (0.0, Some(0.0), Some(0.0), 0500.0, Some(0500.0), Some(0500.0), 6.0, noise_map),
+            (0.0, Some(0.0), Some(0.0), 1000.0, Some(1000.0), Some(1000.0), 6.0, noise_map),
         );
         let samplers = NoiseSampler::build_samplers(values);
         let res = scale_f64_to_u8(NoiseSampler::get_point_value(x, Some(y), None, samplers));
-        let tile = Tile {
+
+        Tile {
             x, y, biome: None,
             altitude: res,
-            // hardness: 127,
-            // temperature: 127,
-            // humidity: 127,
-            // vegetation: 127,
-            // sunlight: 127,
-        };
-        // tile.calculate_biome();
-        tile
+        }
     }
 
-    // todo!
+    // TODO
     #[allow(dead_code)]
     fn calculate_biome(&mut self) {
         self.biome = Some(Biome::Grassland);

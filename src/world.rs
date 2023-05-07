@@ -1,15 +1,7 @@
-use rand::Rng;
-// use noise::{NoiseFn, Seedable};
-
 use crate::tile::Tile;
 
-pub struct WorldCreationParameters {
-    pub dimensions: (u32, u32),
-    pub seed: Option<u32>,
-}
-
-#[derive(Debug)]
 pub struct World {
+    pub seed: u32,
     pub width: u32,
     pub height: u32,
     // pub rotation_angle: u8,
@@ -17,15 +9,12 @@ pub struct World {
 }
 
 impl World {
-    pub fn new(parameters: &WorldCreationParameters) -> World {
+    pub fn new(seed: u32, dimensions: (u32, u32)) -> World {
         // TODO: add seed branch
-        let (width, height) = parameters.dimensions;
+        let (width, height) = dimensions;
         let size = (width * height) as usize;
         let mut tiles = Vec::with_capacity(size);
-        let mut rng = rand::thread_rng();
-        let seed = if !parameters.seed.is_some() { rng.gen::<u32>() } else { parameters.seed.unwrap() };
         let noise = noise::OpenSimplex::new(seed);
-        println!("[MapGen] Using seed [{}]", &seed);
 
         // TODO: Write this properly, maybe scaling with available CPU cores?
         let mut part1 = Vec::with_capacity(size/4);
@@ -74,8 +63,9 @@ impl World {
         tiles.append(&mut part4);
 
         World { 
-            width: parameters.dimensions.0,
-            height: parameters.dimensions.1,
+            seed,
+            width,
+            height,
             // rotation_angle: 0,
             tiles,
         }

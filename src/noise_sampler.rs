@@ -40,11 +40,11 @@ impl<'a> NoiseSampler<'a> {
         result / total_wgt
     }
 
-    pub fn sample(&self, x: u32, y: Option<u32>, z: Option<u32>) -> f64 {
+    fn sample(&self, x: u32, y: Option<u32>, z: Option<u32>) -> f64 {
         let value = self.noise_map.get([
             ((x as f64 + self.xoff) / self.xscale),
-            if y.is_some() { (y.unwrap() as f64 + self.yoff.unwrap()) / self.yscale.unwrap() } else { 0.0 },
-            if z.is_some() { (z.unwrap() as f64 + self.zoff.unwrap()) / self.zscale.unwrap() } else { 0.0 }
+            if let Some(y) = y { (y as f64 + self.yoff.unwrap()) / self.yscale.unwrap() } else { 0.0 },
+            if let Some(z) = z { (z as f64 + self.zoff.unwrap()) / self.zscale.unwrap() } else { 0.0 }
         ]);
         value * self.weight
     }
