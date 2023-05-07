@@ -25,11 +25,10 @@ impl Tile {
     // TODO: enable different types of noise to be used
     pub fn new<'a>(x: u32, y: u32, noise_map: &'a impl NoiseFn<f64, 3>) -> Tile {
         let values = vec!(
-            (0.0f64, Some(0.0f64), Some(0.0f64), 1.0f64, Some(1.0f64), Some(5.0f64), 1.0f64, noise_map),
-            (0.0f64, Some(0.0f64), Some(0.0f64), 10.0f64, Some(10.0f64), Some(10.0f64), 2.0f64, noise_map),
-            (0.0f64, Some(0.0f64), Some(0.0f64), 100.0f64, Some(100.0f64), Some(100.0f64), 4.0f64, noise_map),
-            (0.0f64, Some(0.0f64), Some(0.0f64), 1000.0f64, Some(1000.0f64), Some(1000.0f64), 8.0f64, noise_map),
-            (0.0f64, Some(0.0f64), Some(0.0f64), 10000.0f64, Some(10000.0f64), Some(10000.0f64), 24.0f64, noise_map),
+            (0.0, Some(0.0), Some(0.0), 00010.0, Some(00010.0), Some(00010.0), 2.0, noise_map),
+            (0.0, Some(0.0), Some(0.0), 00100.0, Some(00100.0), Some(00100.0), 4.0, noise_map),
+            (0.0, Some(0.0), Some(0.0), 01000.0, Some(01000.0), Some(01000.0), 8.0, noise_map),
+            (0.0, Some(0.0), Some(0.0), 10000.0, Some(10000.0), Some(10000.0), 24.0, noise_map),
         );
         let samplers = NoiseSampler::build_samplers(values);
         let res = scale_f64_to_u8(NoiseSampler::get_point_value(x, Some(y), None, samplers));
