@@ -15,28 +15,30 @@ pub enum VisualizationMode {
     Sunlight,
 }
 
-pub fn save_image(world: &World, mode: VisualizationMode, file_name: &Option<String>, debug: bool) {
-    let mut log = String::new();
-    let mut img = RgbImage::new(world.width, world.height);
+impl World {
+    pub fn save_image(&self, mode: VisualizationMode, file_name: &Option<String>, debug: bool) {
+        let mut log = String::new();
+        let mut img = RgbImage::new(self.width, self.height);
 
-    let file_name: String = match file_name {
-        Some(name) => name.to_string(),
-        None => world.seed.to_string(),
-    };
+        let file_name: String = match file_name {
+            Some(name) => name.to_string(),
+            None => self.seed.to_string(),
+        };
 
-    for tile in &world.tiles {
-        img.put_pixel(tile.x, tile.y, tile.rgb(&mode));
-        if debug { log.push_str(&format!("{}\n", tile.altitude)); };
+        for tile in &self.tiles {
+            img.put_pixel(tile.x, tile.y, tile.rgb(&mode));
+            if debug { log.push_str(&format!("{}\n", tile.altitude)); };
+        }
+
+        if debug {
+            let log_file: String = format!("./logs/{}.log", &file_name);
+            std::fs::write(log_file, log).unwrap();
+            println!("[MapGen] Writing log to file {}.log", &file_name);
+        }
+
+        println!("[MapGen] Writing image to file {}.png", &file_name);
+        _ = image::save_buffer(format!("./images/{}.png", &file_name), &img, self.width, self.height, Rgb8);
     }
-
-    if debug {
-        let log_file: String = format!("./logs/{}.log", &file_name);
-        std::fs::write(log_file, log).unwrap();
-        println!("[MapGen] Writing log to file {}.log", &file_name);
-    }
-
-    println!("[MapGen] Writing image to file {}.png", &file_name);
-    _ = image::save_buffer(format!("./images/{}.png", &file_name), &img, world.width, world.height, Rgb8);
 }
 
 impl Tile {

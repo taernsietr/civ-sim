@@ -2,7 +2,7 @@ use clap::Parser;
 use rand::Rng;
 
 use crate::world::World;
-use crate::image::{VisualizationMode, save_image};
+use crate::image::VisualizationMode;
 use crate::cli::Args;
 
 mod cli;
@@ -31,6 +31,6 @@ fn main() {
     }
 
     for world in worlds {
-        save_image(&world, VisualizationMode::Biome, &args.file, args.debug);
+        world.save_image(VisualizationMode::Biome, &args.file, args.debug);
     }
 }
