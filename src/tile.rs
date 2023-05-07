@@ -22,15 +22,18 @@ pub struct Tile {
 }
 
 impl Tile {
+    // TODO: enable different types of noise to be used
     pub fn new<'a>(x: u32, y: u32, noise_map: &'a impl NoiseFn<f64, 3>) -> Tile {
         let values = vec!(
-            (0.0f64, Some(0.0f64), Some(0.0f64), 100.0f64, Some(100.0f64), Some(100.0f64), 1.0f64, noise_map),
+            (0.0f64, Some(0.0f64), Some(0.0f64), 1.0f64, Some(1.0f64), Some(5.0f64), 1.0f64, noise_map),
+            (0.0f64, Some(0.0f64), Some(0.0f64), 10.0f64, Some(10.0f64), Some(10.0f64), 2.0f64, noise_map),
+            (0.0f64, Some(0.0f64), Some(0.0f64), 100.0f64, Some(100.0f64), Some(100.0f64), 4.0f64, noise_map),
+            (0.0f64, Some(0.0f64), Some(0.0f64), 1000.0f64, Some(1000.0f64), Some(1000.0f64), 8.0f64, noise_map),
+            (0.0f64, Some(0.0f64), Some(0.0f64), 10000.0f64, Some(10000.0f64), Some(10000.0f64), 24.0f64, noise_map),
         );
         let samplers = NoiseSampler::build_samplers(values);
-
         let res = scale_f64_to_u8(NoiseSampler::get_point_value(x, Some(y), None, samplers));
-
-        let mut tile = Tile {
+        let tile = Tile {
             x, y, biome: None,
             altitude: res,
             // hardness: 127,
@@ -39,20 +42,14 @@ impl Tile {
             // vegetation: 127,
             // sunlight: 127,
         };
-        tile.calculate_biome();
+        // tile.calculate_biome();
         tile
     }
 
     // todo!
+    #[allow(dead_code)]
     fn calculate_biome(&mut self) {
         self.biome = Some(Biome::Grassland);
-    }
-
-    fn sample_noise(x: u32, y: u32, xoff: f64, yoff: f64, scale: f64) -> [f64; 2] {
-        [
-            ((x as f64 + xoff) / scale),
-            ((y as f64 + yoff) / scale)
-        ]
     }
 }
 

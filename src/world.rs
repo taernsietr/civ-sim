@@ -12,7 +12,7 @@ pub struct WorldCreationParameters {
 pub struct World {
     pub width: u32,
     pub height: u32,
-    pub rotation_angle: u8,
+    // pub rotation_angle: u8,
     pub tiles: Vec<Tile>, 
 }
 
@@ -23,7 +23,7 @@ impl World {
         let size = (width * height) as usize;
         let mut tiles = Vec::with_capacity(size);
         let mut rng = rand::thread_rng();
-        let seed = rng.gen::<u32>();
+        let seed = if !parameters.seed.is_some() { rng.gen::<u32>() } else { parameters.seed.unwrap() };
         let noise = noise::OpenSimplex::new(seed);
         println!("[MapGen] Using seed [{}]", &seed);
 
@@ -76,7 +76,7 @@ impl World {
         World { 
             width: parameters.dimensions.0,
             height: parameters.dimensions.1,
-            rotation_angle: 0,
+            // rotation_angle: 0,
             tiles,
         }
         
