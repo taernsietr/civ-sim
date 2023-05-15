@@ -1,5 +1,3 @@
-use std::sync::mpsc;
-
 use crate::tile::Tile;
 
 pub struct World {
@@ -8,61 +6,67 @@ pub struct World {
     pub height: u32,
     // pub rotation_angle: u8,
     pub tiles: Vec<Tile>, 
-    // pub border: Option<u32>,
 }
 
 impl World {
     pub fn new(seed: u32, dimensions: (u32, u32)) -> World {
+        // TODO: add seed branch
         let (width, height) = dimensions;
         let size = (width * height) as usize;
+        let mut tiles = Vec::with_capacity(size);
         let noise = noise::OpenSimplex::new(seed);
 
-        // let mut tiles = Vec::with_capacity(size);
-        let threads = 8;
-        let x_per_thread = width / threads;
-        let x_remainder = width % threads;
-        let y_per_thread = height / threads;
-        let y_remainder = height % threads;
+        // TODO: Write this properly, maybe scaling with available CPU cores?
+        let mut part1 = Vec::with_capacity(size/4);
+        let mut part2 = Vec::with_capacity(size/4);
+        let mut part3 = Vec::with_capacity(size/4);
+        let mut part4 = Vec::with_capacity(size/4);
 
-        let tiles: Vec<Tile> = std::thread::scope(|s| {
-            let mut results = Vec::<Vec<Tile>>::new();
-
-            for thread in 1..=threads {
-                s.spawn(move || {
-                    let mut tiles = Vec::new();
-                    for x in (thread - 1 * x_per_thread)..(thread * x_per_thread) {
-                        for y in (thread - 1 * y_per_thread)..(thread * y_per_thread) {
-                            let tile = Tile::new(x, y, &noise);
-                            tiles.push(tile);
-                        }
+        std::thread::scope(|s| { 
+            s.spawn(|| {
+                for x in 0..width/2 {
+                    for y in 0..height/2 {
+                        let tile = Tile::new(x, y, &noise);
+                        part1.push(tile);
                     }
-                    println!("[MapGen] Thread {} is pushing to the tile array.", &thread);
-                    results.push(tiles);
-                });
-            }
-
-            if x_remainder + y_remainder > 0 {
-                s.spawn(move || {
-                    let mut tiles = Vec::new();
-                    for x in (threads * x_per_thread)..(threads * x_per_thread + x_remainder) {
-                        for y in (threads * y_per_thread)..(threads * y_per_thread + y_remainder) {
-                            let tile = Tile::new(x, y, &noise);
-                            tiles.push(tile);
-                        }
+                }
+            });
+            s.spawn(|| {
+                for x in width/2..width {
+                    for y in 0..height/2 {
+                        let tile = Tile::new(x, y, &noise);
+                        part2.push(tile);
                     }
-                    println!("[MapGen] Thread remainder is pushing to the tile array.");
-                    results.push(tiles);
-                });
-            }
-
-            results.clone().into_iter().flatten().collect()
+                }
+            });
+            s.spawn(|| {
+                for x in 0..width/2 {
+                    for y in height/2..height {
+                        let tile = Tile::new(x, y, &noise);
+                        part3.push(tile);
+                    }
+                }
+            });
+            s.spawn(|| {
+                for x in width/2..width {
+                    for y in height/2..height {
+                        let tile = Tile::new(x, y, &noise);
+                        part4.push(tile);
+                    }
+                }
+            });
         });
 
+        tiles.append(&mut part1);
+        tiles.append(&mut part2);
+        tiles.append(&mut part3);
+        tiles.append(&mut part4);
 
         World { 
             seed,
             width,
             height,
+            // rotation_angle: 0,
             tiles,
         }
         

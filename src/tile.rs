@@ -8,7 +8,7 @@ enum Biome {
     Grassland,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Tile {
     pub x: u32,
     pub y: u32,
@@ -18,7 +18,7 @@ pub struct Tile {
     // pub vegetation: u8,
     // pub hardness: u8,
     // pub sunlight: u8,
-    // biome: Option<Biome>,
+    biome: Option<Biome>,
 }
 
 impl Tile {
@@ -35,17 +35,15 @@ impl Tile {
         let res = scale_f64_to_u8(NoiseSampler::get_point_value(x, Some(y), None, samplers));
 
         Tile {
-            x, y, 
+            x, y, biome: None,
             altitude: res,
         }
     }
 
     // TODO
-    /*
     #[allow(dead_code)]
     fn calculate_biome(&mut self) {
         self.biome = Some(Biome::Grassland);
     }
-    */
 }
 
