@@ -1,8 +1,11 @@
 use image::{RgbImage, Rgb};
 use image::ColorType::Rgb8;
+use chrono::Local;
 
 use crate::world::World;
 use crate::tile::Tile;
+
+const DF: &str = "%y%m%d-%Hh%M";
 
 #[allow(dead_code)]
 pub enum VisualizationMode {
@@ -21,8 +24,8 @@ impl World {
         let mut img = RgbImage::new(self.width, self.height);
 
         let file_name: String = match file_name {
-            Some(name) => name.to_string(),
-            None => self.seed.to_string(),
+            Some(name) => format!("{}-{}", Local::now().format(DF), name),
+            None => format!("{}-{}", Local::now().format(DF), self.seed),
         };
 
         for tile in &self.tiles {
