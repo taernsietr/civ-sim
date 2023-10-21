@@ -1,11 +1,16 @@
-use image::{RgbImage, Rgb};
-use image::ColorType::Rgb8;
+use std::path::PathBuf;
 use chrono::Local;
+use image::{
+    RgbImage,
+    Rgb,
+    ColorType::Rgb8
+};
+use crate::{
+    world::World,
+    tile::Tile
+};
 
-use crate::world::World;
-use crate::tile::Tile;
-
-const DF: &str = "%y%m%d-%Hh%M";
+const DATE_FORMAT: &str = "%y%m%d-%Hh%M";
 
 #[allow(dead_code)]
 pub enum VisualizationMode {
@@ -19,19 +24,24 @@ pub enum VisualizationMode {
 }
 
 impl World {
-    pub fn save_image(&self, mode: VisualizationMode, file_name: &Option<String>, debug: bool) {
+    pub fn save_image(
+        &self,
+        mode: VisualizationMode,
+        file_name: Option<String>,
+        debug: bool
+    ) -> () {
         let mut log = String::new();
         let mut img = RgbImage::new(self.width, self.height);
 
         let file_name: String = match file_name {
-            Some(name) => format!("{}-{}", Local::now().format(DF), name),
-            None => format!("{}-{}", Local::now().format(DF), self.seed),
+            Some(name) => format!("{}-{}", Local::now().format(DATE_FORMAT), name),
+            None => format!("{}-{}", Local::now().format(DATE_FORMAT), self.seed),
         };
 
-        for tile in &self.tiles {
-            img.put_pixel(tile.x, tile.y, tile.rgb(&mode));
-            if debug { log.push_str(&format!("{}\n", tile.altitude)); };
-        }
+        // for tile in &self.tiles {
+        //     img.put_pixel(tile.x, tile.y, tile.rgb(&mode));
+        //     if debug { log.push_str(&format!("{}\n", tile.altitude)); };
+        // }
 
         if debug {
             let log_file: String = format!("./logs/{}.log", &file_name);

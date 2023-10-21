@@ -23,7 +23,11 @@ pub struct Tile {
 
 impl Tile {
     // TODO: enable different types of noise to be used
-    pub fn new(x: u32, y: u32, noise_map: &impl NoiseFn<f64, 3>) -> Tile {
+    pub fn new(
+        x: u32,
+        y: u32,
+        noise_map: &impl NoiseFn<f64, 3>
+    ) -> Tile {
         let values = vec!(
             (0.0, Some(0.0), Some(0.0), 0050.0, Some(0050.0), Some(0050.0), 2.0, noise_map),
             (0.0, Some(0.0), Some(0.0), 0100.0, Some(0100.0), Some(0100.0), 2.0, noise_map),
