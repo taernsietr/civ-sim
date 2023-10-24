@@ -41,14 +41,14 @@ impl TileBuilder {
 
     fn resolve_biome(&self) -> Biome {
         match (self.altitude, self.temperature, self.humidity) {
-            (      255, 255,      255) => Biome::Unset,
-            (    192..,   _,        _) => Biome::Mountain,
-            (160..=191,   _,        _) => Biome::Hills,
-            ( 96..=159,   _,    128..) => Biome::Swamp,
-            ( 96..=159,   _, 64..=127) => Biome::Grassland,
-            ( 96..=159,   _,    ..=63) => Biome::Desert,
-            (  64..=95,   _,        _) => Biome::Coast,
-            (    ..=63,   _,        _) => Biome::Sea,
+            (          255, 255,       255) => Biome::Unset,
+            (    192..=255,   _,         _) => Biome::Mountain,
+            (    160..=191,   _,         _) => Biome::Hills,
+            (     96..=159,   _, 128..=255) => Biome::Swamp,
+            (     96..=159,   _,  64..=127) => Biome::Grassland,
+            (     96..=159,   _,     ..=63) => Biome::Desert,
+            (      80..=95,   _,         _) => Biome::Coast,
+            (        ..=79,   _,         _) => Biome::Sea,
         }
     }
 

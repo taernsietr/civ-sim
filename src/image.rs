@@ -47,7 +47,7 @@ impl World {
         file_name: Option<String>,
         debug: bool
     ) -> () {
-        let mut log = String::new();
+        let mut log = String::from("altitude,temperature,humidity\n");
         let mut img = RgbImage::new(self.width, self.height);
 
         // TODO: refactor to use PathBuf and if-let syntax ?
@@ -58,7 +58,7 @@ impl World {
         
         for tile in &self.tiles {
             img.put_pixel(tile.x, tile.y, tile.rgb(&mode));
-            if debug { log.push_str(&format!("{}\n", tile.altitude)); };
+            if debug { log.push_str(&format!("{},{},{}\n", tile.altitude, tile.temperature, tile.humidity)); };
         }
 
         if debug {

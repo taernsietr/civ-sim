@@ -11,18 +11,20 @@ pub struct SamplingParameters {
     pub weight: f64
 }
 
-#[derive(Default, Debug)]
-pub struct NoiseSampler {
+// #[derive(Default, Debug)]
+pub struct NoiseSampler<'a> {
     values: Vec<SamplingParameters>,
-    // noise_map: &'a dyn NoiseFn<f64, 3>
-    noise_map: noise::OpenSimplex
+    noise_map: &'a (dyn NoiseFn<f64, 3> + Send + Sync)
+    // noise_map: noise::OpenSimplex
 }
 
-impl NoiseSampler {
-    pub fn new(noise_map: noise::OpenSimplex) -> NoiseSampler {
+impl<'a> NoiseSampler<'a> {
+    // pub fn new(noise_map: noise::OpenSimplex) -> NoiseSampler {
+    pub fn new(noise_map: &'a (dyn NoiseFn<f64, 3> + Send + Sync)) -> NoiseSampler {
         NoiseSampler {
+            values: Vec::new(),
             noise_map,
-            ..NoiseSampler::default()
+            // ..NoiseSampler::default()
         }
     }
 

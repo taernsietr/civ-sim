@@ -16,38 +16,34 @@ impl World {
     pub fn new(seed: u32, width: u32, height: u32) -> World {
         let size = (width * height) as usize;
         let mut tiles = Vec::with_capacity(size);
-        let noise = noise::OpenSimplex::new(seed);
+        let open_simplex = noise::OpenSimplex::new(seed);
+        let super_simplex = noise::SuperSimplex::new(seed);
+        let billow = noise::Billow::<noise::OpenSimplex>::new(seed);
 
         let mut sampler = [
-            NoiseSampler::new(noise),
-            NoiseSampler::new(noise),
-            NoiseSampler::new(noise)
+            NoiseSampler::new(&open_simplex),
+            NoiseSampler::new(&super_simplex),
+            NoiseSampler::new(&billow)
         ];
 
         sampler[0]
-            //.add_values([0.0, 0.0, 0.0, 0050.0, 0050.0, 0050.0, 2.0]);
-            //.add_values([0.0, 0.0, 0.0, 0100.0, 0100.0, 0100.0, 2.0])
+            .add_values([0.0, 0.0, 0.0, 0050.0, 0050.0, 0050.0, 2.0])
+            .add_values([0.0, 0.0, 0.0, 0100.0, 0100.0, 0100.0, 2.0])
             .add_values([0.0, 0.0, 0.0, 0250.0, 0250.0, 0250.0, 2.0])
-            .add_values([25.0, 0.0, 0.0, 0250.0, 0250.0, 0250.0, 2.0])
-            .add_values([50.0, 0.0, 0.0, 0250.0, 0250.0, 0250.0, 2.0]);
-            //.add_values([0.0, 0.0, 0.0, 0500.0, 0500.0, 0500.0, 6.0])
-            //.add_values([0.0, 0.0, 0.0, 1000.0, 1000.0, 1000.0, 6.0]);
+            .add_values([0.0, 0.0, 0.0, 0500.0, 0500.0, 0500.0, 6.0])
+            .add_values([0.0, 0.0, 0.0, 1000.0, 1000.0, 1000.0, 6.0]);
         sampler[1]
-            //.add_values([0.0, 0.0, 0.0, 0050.0, 0050.0, 0050.0, 2.0]);
-            //.add_values([0.0, 0.0, 0.0, 0100.0, 0100.0, 0100.0, 2.0])
+            .add_values([0.0, 0.0, 0.0, 0050.0, 0050.0, 0050.0, 2.0])
+            .add_values([0.0, 0.0, 0.0, 0100.0, 0100.0, 0100.0, 2.0])
             .add_values([0.0, 0.0, 0.0, 0250.0, 0250.0, 0250.0, 2.0])
-            .add_values([25.0, 0.0, 0.0, 0250.0, 0250.0, 0250.0, 2.0])
-            .add_values([50.0, 0.0, 0.0, 0250.0, 0250.0, 0250.0, 2.0]);
-            //.add_values([0.0, 0.0, 0.0, 0500.0, 0500.0, 0500.0, 6.0])
-            //.add_values([0.0, 0.0, 0.0, 1000.0, 1000.0, 1000.0, 6.0]);
+            .add_values([0.0, 0.0, 0.0, 0500.0, 0500.0, 0500.0, 6.0])
+            .add_values([0.0, 0.0, 0.0, 1000.0, 1000.0, 1000.0, 6.0]);
         sampler[2]
-            //.add_values([0.0, 0.0, 0.0, 0050.0, 0050.0, 0050.0, 2.0]);
-            //.add_values([0.0, 0.0, 0.0, 0100.0, 0100.0, 0100.0, 2.0])
+            .add_values([0.0, 0.0, 0.0, 0050.0, 0050.0, 0050.0, 2.0])
+            .add_values([0.0, 0.0, 0.0, 0100.0, 0100.0, 0100.0, 2.0])
             .add_values([0.0, 0.0, 0.0, 0250.0, 0250.0, 0250.0, 2.0])
-            .add_values([25.0, 0.0, 0.0, 0250.0, 0250.0, 0250.0, 2.0])
-            .add_values([50.0, 0.0, 0.0, 0250.0, 0250.0, 0250.0, 2.0]);
-            //.add_values([0.0, 0.0, 0.0, 0500.0, 0500.0, 0500.0, 6.0])
-            //.add_values([0.0, 0.0, 0.0, 1000.0, 1000.0, 1000.0, 6.0]);
+            .add_values([0.0, 0.0, 0.0, 0500.0, 0500.0, 0500.0, 6.0])
+            .add_values([0.0, 0.0, 0.0, 1000.0, 1000.0, 1000.0, 6.0]);
 
         let sampler = Arc::new(sampler);
 
