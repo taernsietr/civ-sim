@@ -39,7 +39,8 @@ fn main() {
 
     // for world in worlds {
     worlds.par_iter().for_each(|world| {
-        world.save_image(VisualizationMode::Altitude, args.file.clone(), args.debug);
-        world.save_image(VisualizationMode::Biome, args.file.clone(), args.debug);
+        world.save_image(VisualizationMode::Debug, args.file.clone(), args.debug);
+        // world.save_image(VisualizationMode::Altitude, args.file.clone(), args.debug);
+        // world.save_image(VisualizationMode::Biome, args.file.clone(), args.debug);
     });
 }

@@ -22,6 +22,7 @@ pub enum VisualizationMode {
     Vegetation,
     Hardness,
     Sunlight,
+    Debug,
 }
 
 impl fmt::Display for VisualizationMode {
@@ -34,6 +35,7 @@ impl fmt::Display for VisualizationMode {
             VisualizationMode::Vegetation => write!(f, "vegetation"),
             VisualizationMode::Hardness => write!(f, "hardness"),
             VisualizationMode::Sunlight => write!(f, "sunlight"),
+            VisualizationMode::Debug=> write!(f, "debug"),
         }
     }
 }
@@ -60,14 +62,14 @@ impl World {
         }
 
         if debug {
-            let log_file: String = format!("../logs/{}.log", &file_name);
+            let log_file: String = format!("/home/tsrodr/Run/civ-sim/logs/{}.log", &file_name);
             std::fs::write(log_file, log).unwrap();
             println!("[MapGen] Writing log to file {}.log", &file_name);
         }
 
         println!("[MapGen] Writing image to file {}.png", &file_name);
         _ = image::save_buffer(
-            format!("../images/{}.png", &file_name),
+            format!("/home/tsrodr/Run/civ-sim/images/{}.png", &file_name),
             &img,
             self.width,
             self.height,
@@ -97,6 +99,9 @@ impl Tile {
                     Biome::Mountain =>  Rgb([150, 150, 150]),
                     Biome::Unset =>     Rgb([255,   0,   0]),
                 }
+            },
+            VisualizationMode::Debug => {
+                Rgb([self.altitude, self.temperature, self.humidity])
             }
             _ => { Rgb([self.altitude, self.altitude, self.altitude]) },
         }
