@@ -1,10 +1,16 @@
-use clap::Parser;
 use rand::Rng;
+use clap::Parser;
+use rayon::prelude::*;
 use crate::{
     map::world::World,
     utils::cli::Args,
     image::VisualizationMode,
 };
+
+pub mod utils;
+pub mod map;
+pub mod image;
+pub mod noise_sampler;
 
 fn main() {
     let args = Args::parse();
@@ -31,8 +37,9 @@ fn main() {
         worlds.push(World::new(seed, args.x, args.y));
     }
 
-    for world in worlds {
+    // for world in worlds {
+    worlds.par_iter().for_each(|world| {
         world.save_image(VisualizationMode::Altitude, args.file.clone(), args.debug);
         world.save_image(VisualizationMode::Biome, args.file.clone(), args.debug);
-    }
+    });
 }

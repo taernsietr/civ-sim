@@ -12,16 +12,17 @@ pub struct SamplingParameters {
 }
 
 #[derive(Default, Debug)]
-pub struct NoiseSampler<'a> {
+pub struct NoiseSampler {
     values: Vec<SamplingParameters>,
-    noise_map: &'a dyn NoiseFn<f64, 3>
+    // noise_map: &'a dyn NoiseFn<f64, 3>
+    noise_map: noise::OpenSimplex
 }
 
-impl<'a> NoiseSampler<'a> {
-    pub fn new(noise_map: &'a impl NoiseFn<f64, 3>) -> NoiseSampler<'a> {
+impl NoiseSampler {
+    pub fn new(noise_map: noise::OpenSimplex) -> NoiseSampler {
         NoiseSampler {
-            noise_map
-            ..NoiseSampler::default(),
+            noise_map,
+            ..NoiseSampler::default()
         }
     }
 
@@ -45,7 +46,7 @@ impl<'a> NoiseSampler<'a> {
         let mut result: f64 = 0.0;
         let mut total_wgt: f64 = 0.0;
 
-        for sample in self.values {
+        for sample in &self.values {
             result += sample.weight * self.noise_map.get([
                 (x as f64 + sample.xoff) / sample.xscale,
                 (y as f64 + sample.yoff) / sample.yscale,

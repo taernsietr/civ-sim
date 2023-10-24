@@ -1,13 +1,16 @@
 use crate::{
     noise_sampler::NoiseSampler,
-    helpers::scale_f64_to_u8
+    utils::helpers::scale_f64_to_u8
 };
 
 #[derive(Debug)]
 pub enum Biome {
     Grassland,
+    Swamp,
     Desert,
+    Coast,
     Sea,
+    Hills,
     Mountain,
     Unset,
 }
@@ -31,18 +34,21 @@ impl TileBuilder {
             x,
             y,
             altitude: scale_f64_to_u8(sampler.get_point_value(x, y, 0)),
-            temperature: scale_f64_to_u8(sampler.get_point_value(x, y, 5000)),
-            humidity: scale_f64_to_u8(sampler.get_point_value(x, y, 10000))
+            temperature: scale_f64_to_u8(sampler.get_point_value(x, y, u32::MAX/2)),
+            humidity: scale_f64_to_u8(sampler.get_point_value(x, y, u32::MAX))
         }
     }
 
     fn resolve_biome(&self) -> Biome {
         match (self.altitude, self.temperature, self.humidity) {
-            (128..,      _,    _) => Biome::Mountain,
-            (64..=128, 64.., ..=63) => Biome::Grassland,
-            (64..=128, 64.., 64..) => Biome::Desert,
-            (..=63,       _,    _) => Biome::Sea,
-            (_,           _,    _) => Biome::Unset,
+            (    192.., _,        _) => Biome::Mountain,
+            (160..=191, _,        _) => Biome::Hills,
+            ( 96..=159, _,    128..) => Biome::Swamp,
+            ( 96..=159, _, 64..=127) => Biome::Grassland,
+            ( 96..=159, _,    ..=63) => Biome::Desert,
+            (  64..=95, _,        _) => Biome::Coast,
+            (    ..=63, _,        _) => Biome::Sea,
+                                  _  => Biome::Unset,
         }
     }
 

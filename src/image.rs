@@ -89,10 +89,13 @@ impl Tile {
             VisualizationMode::Biome => {
                 match self.biome {
                     Biome::Grassland => Rgb([ 50, 100,   0]),
+                    Biome::Swamp =>     Rgb([ 30, 120,  30]),
+                    Biome::Coast =>     Rgb([100, 100,  30]),
+                    Biome::Hills =>     Rgb([ 92,  51,  23]),
                     Biome::Desert =>    Rgb([100, 100,   0]),
                     Biome::Sea =>       Rgb([  0,   0, 100]),
                     Biome::Mountain =>  Rgb([150, 150, 150]),
-                    Biome::Unset =>     Rgb([  0,   0,   0]),
+                    Biome::Unset =>     Rgb([255,   0,   0]),
                 }
             }
             _ => { Rgb([self.altitude, self.altitude, self.altitude]) },

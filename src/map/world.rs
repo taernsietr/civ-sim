@@ -1,6 +1,6 @@
 use std::sync::Arc;
 use crate::{
-    tile::{TileBuilder, Tile},
+    map::tile::{TileBuilder, Tile},
     noise_sampler::NoiseSampler
 };
 
@@ -13,13 +13,13 @@ pub struct World {
 }
 
 impl World {
-    pub fn new(seed: u32, width:: u32, height: u32) -> World {
-        // TODO: add seed branch
+    pub fn new(seed: u32, width: u32, height: u32) -> World {
         let size = (width * height) as usize;
         let mut tiles = Vec::with_capacity(size);
         let noise = noise::OpenSimplex::new(seed);
+        let mut sampler = NoiseSampler::new(noise);
 
-        let mut sampler = NoiseSampler::new(noise)
+        sampler
             .add_values([0.0, 0.0, 0.0, 0050.0, 0050.0, 0050.0, 2.0])
             .add_values([0.0, 0.0, 0.0, 0100.0, 0100.0, 0100.0, 2.0])
             .add_values([0.0, 0.0, 0.0, 0250.0, 0250.0, 0250.0, 2.0])
@@ -63,7 +63,7 @@ impl World {
                 }
             });
             s.spawn(|| {
-                for x in width/4..width/2) {
+                for x in width/4..width/2 {
                     for y in 0..height/4 {
                         let tile = TileBuilder::new(x, y, &sampler);
                         part_2.push(tile.build());
@@ -95,7 +95,7 @@ impl World {
                 }
             });
             s.spawn(|| {
-                for x in width/4..width/2) {
+                for x in width/4..width/2 {
                     for y in height/4..height/2 {
                         let tile = TileBuilder::new(x, y, &sampler);
                         part_6.push(tile.build());
@@ -127,7 +127,7 @@ impl World {
                 }
             });
             s.spawn(|| {
-                for x in width/4..width/2) {
+                for x in width/4..width/2 {
                     for y in height/2..(3*height/4) {
                         let tile = TileBuilder::new(x, y, &sampler);
                         part_10.push(tile.build());
@@ -159,7 +159,7 @@ impl World {
                 }
             });
             s.spawn(|| {
-                for x in width/4..width/2) {
+                for x in width/4..width/2 {
                     for y in (3*height/4)..height {
                         let tile = TileBuilder::new(x, y, &sampler);
                         part_14.push(tile.build());
