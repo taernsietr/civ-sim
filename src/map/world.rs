@@ -8,7 +8,6 @@ pub struct World {
     pub seeds: [u32; 3],
     pub width: u32,
     pub height: u32,
-    // pub rotation_angle: u8,
     pub tiles: Vec<Tile>, 
 }
 
@@ -16,9 +15,6 @@ impl World {
     pub fn new(seeds: [u32; 3], width: u32, height: u32) -> World {
         let size = (width * height) as usize;
         let mut tiles = Vec::with_capacity(size);
-//      let open_simplex = noise::OpenSimplex::new(seed);
-//      let super_simplex = noise::SuperSimplex::new(seed);
-//      let billow = noise::Billow::<noise::OpenSimplex>::new(seed);
 //
         let a = noise::SuperSimplex::new(seeds[0]);
         let b = noise::SuperSimplex::new(seeds[1]);
@@ -227,7 +223,6 @@ impl World {
             seeds,
             width,
             height,
-            // rotation_angle: 0,
             tiles,
         }
     }
