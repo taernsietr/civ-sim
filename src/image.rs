@@ -10,6 +10,7 @@ use crate::map::{
     world::World,
     tile::{Tile, Biome}
 };
+use crate::utils::helpers::scale_f64_to_u8;
 
 const DATE_FORMAT: &str = "%y%m%d-%Hh%M";
 
@@ -45,19 +46,18 @@ pub fn save_image(
     mode: VisualizationMode,
     file_name: Option<String>,
     debug: bool
-) -> () {
+) {
     let mut log = String::from("altitude,temperature,humidity\n");
     let mut img = RgbImage::new(world.width, world.height);
 
     // TODO: refactor to use PathBuf and if-let syntax ?
     let file_name: String = match file_name {
         Some(name) => format!("{}-{}-{}", Local::now().format(DATE_FORMAT), name, mode),
-        None => format!("{}-{}-{}", Local::now().format(DATE_FORMAT), world.seeds[0], mode), // change
-                                                                                            // later
+        None => format!("{}-{}-{}", Local::now().format(DATE_FORMAT), world.seeds[0], mode), // change later
     };
     
     for tile in &world.tiles {
-        img.put_pixel(tile.x, tile.y, tile.rgb(&mode));
+        img.put_pixel(tile.x as u32, tile.y as u32, tile.rgb(&mode));
         if debug { log.push_str(&format!("{},{},{}\n", tile.altitude, tile.temperature, tile.humidity)); };
     }
 
@@ -79,37 +79,39 @@ pub fn save_image(
 
 impl Tile {
     pub fn rgb(&self, mode: &VisualizationMode) -> Rgb<u8> {
-        match mode {
-            VisualizationMode::Debug=> {
-                if                             self.altitude <=  98 { Rgb([150, 150, 150]) } // mountains
-                else if  98 < self.altitude && self.altitude <= 110 { Rgb([ 25,  75,   0]) } // hills
-                else if 110 < self.altitude && self.altitude <= 134 { Rgb([ 50, 100,   0]) } // plains
-                else if 134 < self.altitude && self.altitude <= 136 { Rgb([100, 100,   0]) } // beaches
-                else                                                { Rgb([  0,   0, 100]) } // water
+        let rgb: [u8; 3] = match mode {
+            VisualizationMode::Debug => {
+                let color = [scale_f64_to_u8(self.altitude), scale_f64_to_u8(self.humidity), scale_f64_to_u8(self.temperature)];
+                [color[0], color[1], color[2]]
             },
             VisualizationMode::Biome => {
                 match self.biome {
-                    Biome::Grassland => Rgb([ 50, 100,   0]),
-                    Biome::Swamp =>     Rgb([ 30, 120,  30]),
-                    Biome::Coast =>     Rgb([100, 100,  30]),
-                    Biome::Hills =>     Rgb([ 92,  51,  23]),
-                    Biome::Desert =>    Rgb([100, 100,   0]),
-                    Biome::Sea =>       Rgb([  0,   0, 100]),
-                    Biome::Mountain =>  Rgb([150, 150, 150]),
-                    Biome::Unset =>     Rgb([255,   0,   0]),
+                    Biome::Grassland => [  0, 153,   0],
+                    Biome::Swamp =>     [ 75, 100,   0],
+                    // Biome::Coast =>     [100, 100,  30],
+                    Biome::Coast =>     [  0,   0,   0],
+                    Biome::Hills =>     [ 96,  96,  64],
+                    Biome::Desert =>    [255, 204, 153],
+                    Biome::Sea =>       [  0,   0, 100],
+                    Biome::Mountain =>  [128, 128, 196],
                 }
             },
             VisualizationMode::Altitude => {
-                Rgb([self.altitude, self.altitude, self.altitude])
+                let color = scale_f64_to_u8(self.altitude);
+                [color, color, color]
             },
             VisualizationMode::Humidity => {
-                Rgb([0, 0, self.humidity])
+                let color = scale_f64_to_u8(self.humidity);
+                [0, 0, color]
             },
             VisualizationMode::Temperature=> {
-                Rgb([self.temperature, 0, 0])
+                let color = scale_f64_to_u8(self.temperature);
+                [color, 0, 0]
             },
-            _ => unreachable!(),
-        }
+            _ => unreachable!()
+        };
+
+        Rgb([rgb[0],rgb[1],rgb[2]])
     }
 }
 

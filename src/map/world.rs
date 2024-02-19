@@ -1,8 +1,14 @@
 use std::sync::Arc;
-use crate::{
-    map::tile::{TileBuilder, Tile},
-    noise_sampler::NoiseSampler
-};
+use crate::map::tile::Tile;
+
+pub struct WorldParameters {
+    pub sea_level: f64,
+    pub grassland_threshold: f64,
+    pub swamp_threshold: f64,
+    pub desert_threshold: f64,
+    pub hill_threshold: f64,
+    pub mountain_threshold: f64,
+}
 
 pub struct World {
     pub seeds: [u32; 3],
@@ -12,43 +18,26 @@ pub struct World {
 }
 
 impl World {
-    pub fn new(seeds: [u32; 3], width: u32, height: u32) -> World {
+    pub fn new(
+        seeds: [u32; 3],
+        width: u32,
+        height: u32,
+        parameters: &WorldParameters,
+    ) -> World {
         let size = (width * height) as usize;
         let mut tiles = Vec::with_capacity(size);
-//
-        let a = noise::SuperSimplex::new(seeds[0]);
-        let b = noise::SuperSimplex::new(seeds[1]);
-        let c = noise::SuperSimplex::new(seeds[2]);
 
-        let mut sampler = [
-            NoiseSampler::new(&a),
-            NoiseSampler::new(&b),
-            NoiseSampler::new(&c)
+        let noise = [
+            noise::Fbm::<noise::OpenSimplex>::new(seeds[0]),
+            noise::Fbm::<noise::OpenSimplex>::new(seeds[1]),
+            noise::Fbm::<noise::OpenSimplex>::new(seeds[2])
         ];
 
-        let test_values = [
-            [0.0, 0.0, 0.0, 1000.0, 1000.0, 1000.0, 7.0],
-            [0.0, 0.0, 0.0, 0100.0, 0100.0, 0100.0, 1.0],
-            [0.0, 0.0, 0.0, 0010.0, 0010.0, 0010.0, 1.0],
-            [0.0, 0.0, 0.0, 0001.0, 0001.0, 0001.0, 1.0],
-        ];
-
-        sampler[0]
-            .add_values(test_values[0])
-            .add_values(test_values[1]);
-        sampler[1]
-            .add_values(test_values[0])
-            .add_values(test_values[1]);
-        sampler[2]
-            .add_values(test_values[0])
-            .add_values(test_values[1]);
-
-        let sampler = Arc::new(sampler);
+        let noise = Arc::new(noise);
 
 //        for x in 0..width {
 //            for y in 0..height {
-//                let tile_builder = TileBuilder::new(x, y, &sampler);
-//                tiles.push(tile_builder.build());
+//                tiles.push(Tile::new(x as f64, y as f64, &noise, parameters));
 //            }
 //        }
 
@@ -75,128 +64,112 @@ impl World {
             s.spawn(|| {
                 for x in 0..width/4 {
                     for y in 0..height/4 {
-                        let tile = TileBuilder::new(x, y, &sampler);
-                        part_1.push(tile.build());
+                        part_1.push(Tile::new(x as f64, y as f64, &noise, parameters));
                     }
                 }
             });
             s.spawn(|| {
                 for x in width/4..width/2 {
                     for y in 0..height/4 {
-                        let tile = TileBuilder::new(x, y, &sampler);
-                        part_2.push(tile.build());
+                        part_2.push(Tile::new(x as f64, y as f64, &noise, parameters));
                     }
                 }
             });
             s.spawn(|| {
                 for x in width/2..(3*width/4) {
                     for y in 0..height/4 {
-                        let tile = TileBuilder::new(x, y, &sampler);
-                        part_3.push(tile.build());
+                        part_3.push(Tile::new(x as f64, y as f64, &noise, parameters));
                     }
                 }
             });
             s.spawn(|| {
                 for x in (3*width/4)..width {
                     for y in 0..height/4 {
-                        let tile = TileBuilder::new(x, y, &sampler);
-                        part_4.push(tile.build());
+                        part_4.push(Tile::new(x as f64, y as f64, &noise, parameters));
                     }
                 }
             });
             s.spawn(|| {
                 for x in 0..width/4 {
                     for y in height/4..height/2 {
-                        let tile = TileBuilder::new(x, y, &sampler);
-                        part_5.push(tile.build());
+                        part_5.push(Tile::new(x as f64, y as f64, &noise, parameters));
                     }
                 }
             });
             s.spawn(|| {
                 for x in width/4..width/2 {
                     for y in height/4..height/2 {
-                        let tile = TileBuilder::new(x, y, &sampler);
-                        part_6.push(tile.build());
+                        part_6.push(Tile::new(x as f64, y as f64, &noise, parameters));
                     }
                 }
             });
             s.spawn(|| {
                 for x in width/2..(3*width/4) {
                     for y in height/4..height/2 {
-                        let tile = TileBuilder::new(x, y, &sampler);
-                        part_7.push(tile.build());
+                        part_7.push(Tile::new(x as f64, y as f64, &noise, parameters));
                     }
                 }
             });
             s.spawn(|| {
                 for x in (3*width/4)..width {
                     for y in height/4..height/2 {
-                        let tile = TileBuilder::new(x, y, &sampler);
-                        part_8.push(tile.build());
+                        part_8.push(Tile::new(x as f64, y as f64, &noise, parameters));
                     }
                 }
             });
             s.spawn(|| {
                 for x in 0..width/4 {
                     for y in height/2..(3*height/4) {
-                        let tile = TileBuilder::new(x, y, &sampler);
-                        part_9.push(tile.build());
+                        part_9.push(Tile::new(x as f64, y as f64, &noise, parameters));
                     }
                 }
             });
             s.spawn(|| {
                 for x in width/4..width/2 {
                     for y in height/2..(3*height/4) {
-                        let tile = TileBuilder::new(x, y, &sampler);
-                        part_10.push(tile.build());
+                        part_10.push(Tile::new(x as f64, y as f64, &noise, parameters));
                     }
                 }
             });
             s.spawn(|| {
                 for x in width/2..(3*width/4) {
                     for y in height/2..(3*height/4) {
-                        let tile = TileBuilder::new(x, y, &sampler);
-                        part_11.push(tile.build());
+                        part_11.push(Tile::new(x as f64, y as f64, &noise, parameters));
                     }
                 }
             });
             s.spawn(|| {
                 for x in (3*width/4)..width {
                     for y in height/2..(3*height/4) {
-                        let tile = TileBuilder::new(x, y, &sampler);
-                        part_12.push(tile.build());
+                        part_12.push(Tile::new(x as f64, y as f64, &noise, parameters));
                     }
                 }
             });
             s.spawn(|| {
                 for x in 0..width/4 {
                     for y in (3*height/4)..height {
-                        let tile = TileBuilder::new(x, y, &sampler);
-                        part_13.push(tile.build());
+                        part_13.push(Tile::new(x as f64, y as f64, &noise, parameters));
                     }
                 }
             });
             s.spawn(|| {
                 for x in width/4..width/2 {
                     for y in (3*height/4)..height {
-                        let tile = TileBuilder::new(x, y, &sampler);
-                        part_14.push(tile.build());
+                        part_14.push(Tile::new(x as f64, y as f64, &noise, parameters));
                     }
                 }
             });
             s.spawn(|| {
                 for x in width/2..(3*width/4) {
                     for y in (3*height/4)..height {
-                        let tile = TileBuilder::new(x, y, &sampler);
-                        part_15.push(tile.build());
+                        part_15.push(Tile::new(x as f64, y as f64, &noise, parameters));
                     }
                 }
             });
             s.spawn(|| {
                 for x in (3*width/4)..width {
                     for y in (3*height/4)..height {
-                        let tile = TileBuilder::new(x, y, &sampler);
-                        part_16.push(tile.build());
+                        part_16.push(Tile::new(x as f64, y as f64, &noise, parameters));
                     }
                 }
             });

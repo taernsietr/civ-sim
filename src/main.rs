@@ -1,10 +1,7 @@
-use rand::Rng;
 use clap::Parser;
 use rayon::prelude::*;
 use crate::{
-    map::world::World,
-    utils::cli::Args,
-    image::{save_image, VisualizationMode}
+    image::{save_image, VisualizationMode}, utils::{cli::Args, helpers::generate_worlds}
 };
 
 pub mod utils;
@@ -23,33 +20,13 @@ fn main() {
         args.y
     );
 
-    let mut worlds = Vec::<World>::with_capacity(args.variations as usize);
-    let mut rng = rand::thread_rng();
-    
-    for i in 0..args.variations {
-        let seeds = if args.seeds.is_none() { 
-            [
-                rng.gen::<u32>(),
-                rng.gen::<u32>(),
-                rng.gen::<u32>()
-            ]
-        } else { 
-            [
-                args.seeds.unwrap(),
-                args.seeds.unwrap() + 1,
-                args.seeds.unwrap() + 2
-            ]
-        };
-
-        println!("[MapGen] Building world no. {} using given seed(s)...", i);
-        worlds.push(World::new(seeds, args.x, args.y));
-    }
+    let worlds = generate_worlds(&args);
 
     worlds.par_iter().for_each(|world| {
         // save_image(world, VisualizationMode::Debug, args.file.clone(), args.debug);
         save_image(world, VisualizationMode::Altitude, args.file.clone(), args.debug);
-        save_image(world, VisualizationMode::Temperature, args.file.clone(), args.debug);
-        save_image(world, VisualizationMode::Humidity, args.file.clone(), args.debug);
+        // save_image(world, VisualizationMode::Temperature, args.file.clone(), args.debug);
+        // save_image(world, VisualizationMode::Humidity, args.file.clone(), args.debug);
         save_image(world, VisualizationMode::Biome, args.file.clone(), args.debug);
     });
 }

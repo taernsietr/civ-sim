@@ -1,84 +1,60 @@
-use crate::{
-    noise_sampler::NoiseSampler,
-    utils::helpers::scale_f64_to_u8
-};
+use noise::NoiseFn;
+use super::world::WorldParameters;
+
+const ALTITUDE_SCALE: f64 = 1000.0;
+const TEMPERATURE_SCALE: f64 = 500.0;
+const HUMIDITY_SCALE: f64 = 500.0;
 
 #[derive(Debug)]
 pub enum Biome {
     Grassland,
     Swamp,
     Desert,
-    Coast,
     Sea,
     Hills,
     Mountain,
-    Unset,
-}
-
-#[derive(Debug)]
-pub struct TileBuilder {
-    pub x: u32,
-    pub y: u32,
-    pub altitude: u8,
-    pub temperature: u8,
-    pub humidity: u8,
-    //pub vegetation: u8,
-    //pub hardness: u8,
-    //pub sunlight: u8,
-}
-
-impl TileBuilder {
-    // TODO: enable different types of noise to be used
-    pub fn new(x: u32, y: u32, sampler: &[NoiseSampler; 3]) -> TileBuilder {
-        TileBuilder {
-            x,
-            y,
-            altitude: scale_f64_to_u8(sampler[0].get_point_value(x, y, 0)),
-            temperature: scale_f64_to_u8(sampler[1].get_point_value(x, y, u32::MAX/2)),
-            humidity: scale_f64_to_u8(sampler[2].get_point_value(x, y, u32::MAX))
-        }
-    }
-
-    fn resolve_biome(&self) -> Biome {
-        match (self.altitude, self.temperature, self.humidity) {
-            (          255, 255,       255) => Biome::Unset,
-            (    192..=255,   _,         _) => Biome::Mountain,
-            (    160..=191,   _,         _) => Biome::Hills,
-            (     96..=159,   _, 128..=255) => Biome::Swamp,
-            (     96..=159,   _,  64..=127) => Biome::Grassland,
-            (     96..=159,   _,     ..=63) => Biome::Desert,
-            (      80..=95,   _,         _) => Biome::Coast,
-            (        ..=79,   _,         _) => Biome::Sea,
-        }
-    }
-
-    pub fn build(self) -> Tile {
-        let biome: Biome = self.resolve_biome();
-        Tile {
-            x: self.x,
-            y: self.y,
-            altitude: self.altitude,
-            temperature: self.temperature,
-            humidity: self.humidity,
-            //vegetation: self.vegetation,
-            //hardness: self.hardness,
-            //sunlight: self.sunlight,
-            biome
-        }
-    }
-    
+    Coast,
 }
 
 #[derive(Debug)]
 pub struct Tile {
-    pub x: u32,
-    pub y: u32,
-    pub altitude: u8,
-    pub temperature: u8,
-    pub humidity: u8,
-    //pub vegetation: u8,
-    //pub hardness: u8,
-    //pub sunlight: u8,
+    pub x: f64,
+    pub y: f64,
+    pub altitude: f64,
+    pub temperature: f64,
+    pub humidity: f64,
     pub biome: Biome,
+}
+
+impl Tile {
+    pub fn new(
+        x: f64,
+        y: f64,
+        noise: &[noise::Fbm<noise::OpenSimplex>; 3],
+        parameters: &WorldParameters
+    ) -> Tile {
+        let altitude = noise[0].get([x / ALTITUDE_SCALE, y / ALTITUDE_SCALE]);
+        let temperature = noise[1].get([x / TEMPERATURE_SCALE, y / TEMPERATURE_SCALE]);
+        let humidity = noise[2].get([x / HUMIDITY_SCALE, y / HUMIDITY_SCALE]);
+            
+        let biome = {
+            if altitude <= parameters.sea_level { Biome::Sea }
+            else if parameters.swamp_threshold >= humidity && humidity > parameters.grassland_threshold { Biome::Swamp }
+            else if parameters.grassland_threshold >= humidity && humidity > parameters.desert_threshold { Biome::Grassland}
+            else if humidity <= parameters.desert_threshold { Biome::Desert }
+            else if parameters.mountain_threshold > altitude && altitude >= parameters.hill_threshold { Biome::Hills }
+            else if altitude >= parameters.mountain_threshold { Biome::Mountain }
+            else { Biome::Coast }
+        };
+            
+        Tile {
+            x,
+            y,
+            altitude,
+            temperature,
+            humidity,
+            biome
+        }
+    }
 }
 
