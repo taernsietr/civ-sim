@@ -2,10 +2,7 @@
 use std::fmt;
 use chrono::Local;
 use nannou::image::{
-    RgbImage,
-    Rgb,
-    ColorType::Rgb8,
-    save_buffer
+    save_buffer, ColorType::Rgb8, Rgb, RgbImage
 };
 use crate::map::{
     world::World,
@@ -52,6 +49,26 @@ pub fn generate_image(
     }
     println!("[MapGen] Finished building image.");
     img
+}
+
+pub fn create_coast(world: &World, image: &mut RgbImage) {
+    let h = world.height as usize;
+    let world_size = h * world.width as usize; 
+
+    for (i, tile) in world.tiles.iter().enumerate() {
+        if matches!(tile.biome, Biome::Sea) {
+            let indices = 
+                if i == 0                       { vec!(i+1, i+h) }            // first tile 
+                else if i < h                   { vec!(i-1, i+1, i+h) }       // first row
+                else if i == world_size - 1     { vec!(i-h, i-1) }            // last tile
+                else if i >= world_size - 1 - h { vec!(i-h, i-1, i+1) }       // last row
+                else                            { vec!(i-h, i-1, i+1, i+h) }; // elsewhere
+            for j in &indices {
+                if matches!(world.tiles[*j as usize].biome, Biome::Sea) {}
+                else { image.put_pixel(tile.x as u32, tile.y as u32, Rgb([0,50,100])); }
+            }
+        };
+    }
 }
 
 pub fn save_image(
@@ -101,8 +118,7 @@ impl Tile {
                 match self.biome {
                     Biome::Grassland => [  0, 153,   0],
                     Biome::Swamp =>     [ 75, 100,   0],
-                    // Biome::Coast =>     [100, 100,  30],
-                    Biome::Coast =>     [  0,   0,   0],
+                    Biome::Coast =>     [  0,  50, 100],
                     Biome::Hills =>     [ 96,  96,  64],
                     Biome::Desert =>    [255, 204, 153],
                     Biome::Sea =>       [  0,   0, 100],

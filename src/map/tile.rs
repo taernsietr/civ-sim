@@ -50,7 +50,7 @@ impl Tile {
             else if humidity <= desert_humidity { Biome::Desert }
             else if swamp_humidity < humidity && humidity > desert_humidity { Biome::Grassland}
             else if swamp_humidity >= humidity { Biome::Swamp }
-            else { dbg!(&altitude, &temperature, &humidity); Biome::Coast }
+            else { Biome::Coast }
         };
 
         /*

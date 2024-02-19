@@ -3,7 +3,7 @@ use nannou::prelude::*;
 use lazy_static::lazy_static;
 // use rayon::prelude::*;
 use crate::{
-    image::{generate_image, VisualizationMode},
+    image::{generate_image, create_coast, VisualizationMode},
     utils::{cli::Args, helpers::generate_worlds},
     map::world::World
 };
@@ -50,7 +50,8 @@ struct Model {
 fn model(app: &App) -> Model {
     let _window = app.new_window().mouse_pressed(mouse_pressed).view(view).build().unwrap();
     let worlds: Vec<World> = generate_worlds(&ARGS);
-    let image = generate_image(&worlds[0], VisualizationMode::Biome);
+    let mut image = generate_image(&worlds[0], VisualizationMode::Biome);
+    create_coast(&worlds[0], &mut image);
     let converted = nannou::image::DynamicImage::ImageRgb8(image);
     let texture = Texture::from_image(app, &converted);
     Model { _window, worlds, texture }
@@ -58,7 +59,8 @@ fn model(app: &App) -> Model {
 
 fn mouse_pressed(app: &App, model: &mut Model, _key: MouseButton) {
     model.worlds = generate_worlds(&ARGS);
-    let image = generate_image(&model.worlds[0], VisualizationMode::Biome);
+    let mut image = generate_image(&model.worlds[0], VisualizationMode::Biome);
+    create_coast(&model.worlds[0], &mut image);
     let converted = nannou::image::DynamicImage::ImageRgb8(image);
     model.texture = Texture::from_image(app, &converted);
 }
