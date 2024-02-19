@@ -1,5 +1,5 @@
 use clap::Parser;
-use nannou::{prelude::*, state::mouse};
+use nannou::prelude::*;
 use lazy_static::lazy_static;
 // use rayon::prelude::*;
 use crate::{
@@ -20,13 +20,13 @@ lazy_static! {
 
 fn main() {
 
-    //if args.debug { println!("[MapGen] Running with debug on; logs will be generated"); };
-    //println!(
-    //    "[MapGen] We are attempting to generate {} map(s) in {} x {}.",
-    //    args.variations,
-    //    args.x,
-    //    args.y
-    //);
+    if ARGS.debug { println!("[MapGen] Running with debug on; logs will be generated"); };
+    println!(
+        "[MapGen] We are attempting to generate {} map(s) in {} x {}.",
+        ARGS.variations,
+        ARGS.x,
+        ARGS.y
+    );
 
     // let worlds = generate_worlds(&args);
 

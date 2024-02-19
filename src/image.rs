@@ -50,6 +50,7 @@ pub fn generate_image(
     for tile in &world.tiles {
         img.put_pixel(tile.x as u32, tile.y as u32, tile.rgb(&mode));
     }
+    println!("[MapGen] Finished building image.");
     img
 }
 
