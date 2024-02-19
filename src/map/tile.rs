@@ -31,21 +31,33 @@ impl Tile {
         x: f64,
         y: f64,
         noise: &[noise::Fbm<noise::OpenSimplex>; 3],
-        parameters: &WorldParameters
+        _parameters: &WorldParameters
     ) -> Tile {
         let altitude = noise[0].get([x / ALTITUDE_SCALE, y / ALTITUDE_SCALE]);
         let temperature = noise[1].get([x / TEMPERATURE_SCALE, y / TEMPERATURE_SCALE]);
         let humidity = noise[2].get([x / HUMIDITY_SCALE, y / HUMIDITY_SCALE]);
             
+        let sea_level = 0.0;
+        let swamp_humidity = 0.6;
+        let desert_humidity = 0.0;
+        let hill_altitude = 0.3;
+        let mountain_altitude = 0.5;
+
         let biome = {
-            if altitude <= parameters.sea_level { Biome::Sea }
-            else if parameters.swamp_threshold >= humidity && humidity > parameters.grassland_threshold { Biome::Swamp }
-            else if parameters.grassland_threshold >= humidity && humidity > parameters.desert_threshold { Biome::Grassland}
-            else if humidity <= parameters.desert_threshold { Biome::Desert }
-            else if parameters.mountain_threshold > altitude && altitude >= parameters.hill_threshold { Biome::Hills }
-            else if altitude >= parameters.mountain_threshold { Biome::Mountain }
-            else { Biome::Coast }
+            if altitude <= sea_level { Biome::Sea }
+            else if mountain_altitude > altitude && altitude >= hill_altitude { Biome::Hills }
+            else if altitude >= mountain_altitude { Biome::Mountain }
+            else if humidity <= desert_humidity { Biome::Desert }
+            else if swamp_humidity < humidity && humidity > desert_humidity { Biome::Grassland}
+            else if swamp_humidity >= humidity { Biome::Swamp }
+            else { dbg!(&altitude, &temperature, &humidity); Biome::Coast }
         };
+
+        /*
+           altitude = 0.12957644594934173
+           temperature = -0.5813534064277605
+           humidity = 0.5008365702790374
+        */
             
         Tile {
             x,

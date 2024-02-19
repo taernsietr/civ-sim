@@ -65,8 +65,9 @@ fn mouse_pressed(app: &App, model: &mut Model, _key: MouseButton) {
 
 
 fn view(app: &App, model: &Model, frame: Frame) {
+    frame.clear(BLACK);
     let draw = app.draw();
-    draw.background().color(BLACK);
-    draw.texture(&model.texture);
+    let rect = app.window_rect();
+    draw.texture(&model.texture).w_h(rect.w(), rect.h());
     draw.to_frame(app, &frame).unwrap();
 }
