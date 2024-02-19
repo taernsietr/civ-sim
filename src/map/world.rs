@@ -5,7 +5,7 @@ use crate::{
 };
 
 pub struct World {
-    pub seed: u32,
+    pub seeds: [u32; 3],
     pub width: u32,
     pub height: u32,
     // pub rotation_angle: u8,
@@ -13,37 +13,39 @@ pub struct World {
 }
 
 impl World {
-    pub fn new(seed: u32, width: u32, height: u32) -> World {
+    pub fn new(seeds: [u32; 3], width: u32, height: u32) -> World {
         let size = (width * height) as usize;
         let mut tiles = Vec::with_capacity(size);
-        let open_simplex = noise::OpenSimplex::new(seed);
-        let super_simplex = noise::SuperSimplex::new(seed);
-        let billow = noise::Billow::<noise::OpenSimplex>::new(seed);
+//      let open_simplex = noise::OpenSimplex::new(seed);
+//      let super_simplex = noise::SuperSimplex::new(seed);
+//      let billow = noise::Billow::<noise::OpenSimplex>::new(seed);
+//
+        let a = noise::SuperSimplex::new(seeds[0]);
+        let b = noise::SuperSimplex::new(seeds[1]);
+        let c = noise::SuperSimplex::new(seeds[2]);
 
         let mut sampler = [
-            NoiseSampler::new(&open_simplex),
-            NoiseSampler::new(&super_simplex),
-            NoiseSampler::new(&billow)
+            NoiseSampler::new(&a),
+            NoiseSampler::new(&b),
+            NoiseSampler::new(&c)
+        ];
+
+        let test_values = [
+            [0.0, 0.0, 0.0, 1000.0, 1000.0, 1000.0, 7.0],
+            [0.0, 0.0, 0.0, 0100.0, 0100.0, 0100.0, 1.0],
+            [0.0, 0.0, 0.0, 0010.0, 0010.0, 0010.0, 1.0],
+            [0.0, 0.0, 0.0, 0001.0, 0001.0, 0001.0, 1.0],
         ];
 
         sampler[0]
-            .add_values([0.0, 0.0, 0.0, 0050.0, 0050.0, 0050.0, 2.0])
-            .add_values([0.0, 0.0, 0.0, 0100.0, 0100.0, 0100.0, 2.0])
-            .add_values([0.0, 0.0, 0.0, 0250.0, 0250.0, 0250.0, 2.0])
-            .add_values([0.0, 0.0, 0.0, 0500.0, 0500.0, 0500.0, 6.0])
-            .add_values([0.0, 0.0, 0.0, 1000.0, 1000.0, 1000.0, 6.0]);
+            .add_values(test_values[0])
+            .add_values(test_values[1]);
         sampler[1]
-            .add_values([0.0, 0.0, 0.0, 0050.0, 0050.0, 0050.0, 2.0])
-            .add_values([0.0, 0.0, 0.0, 0100.0, 0100.0, 0100.0, 2.0])
-            .add_values([0.0, 0.0, 0.0, 0250.0, 0250.0, 0250.0, 2.0])
-            .add_values([0.0, 0.0, 0.0, 0500.0, 0500.0, 0500.0, 6.0])
-            .add_values([0.0, 0.0, 0.0, 1000.0, 1000.0, 1000.0, 6.0]);
+            .add_values(test_values[0])
+            .add_values(test_values[1]);
         sampler[2]
-            .add_values([0.0, 0.0, 0.0, 0050.0, 0050.0, 0050.0, 2.0])
-            .add_values([0.0, 0.0, 0.0, 0100.0, 0100.0, 0100.0, 2.0])
-            .add_values([0.0, 0.0, 0.0, 0250.0, 0250.0, 0250.0, 2.0])
-            .add_values([0.0, 0.0, 0.0, 0500.0, 0500.0, 0500.0, 6.0])
-            .add_values([0.0, 0.0, 0.0, 1000.0, 1000.0, 1000.0, 6.0]);
+            .add_values(test_values[0])
+            .add_values(test_values[1]);
 
         let sampler = Arc::new(sampler);
 
@@ -222,7 +224,7 @@ impl World {
         tiles.append(&mut part_16);
 
         World { 
-            seed,
+            seeds,
             width,
             height,
             // rotation_angle: 0,

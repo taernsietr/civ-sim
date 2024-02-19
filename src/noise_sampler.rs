@@ -15,11 +15,9 @@ pub struct SamplingParameters {
 pub struct NoiseSampler<'a> {
     values: Vec<SamplingParameters>,
     noise_map: &'a (dyn NoiseFn<f64, 3> + Send + Sync)
-    // noise_map: noise::OpenSimplex
 }
 
 impl<'a> NoiseSampler<'a> {
-    // pub fn new(noise_map: noise::OpenSimplex) -> NoiseSampler {
     pub fn new(noise_map: &'a (dyn NoiseFn<f64, 3> + Send + Sync)) -> NoiseSampler {
         NoiseSampler {
             values: Vec::new(),

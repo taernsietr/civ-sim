@@ -19,5 +19,5 @@ pub struct Args {
     pub file: Option<String>,
 
     #[arg(short, long)]
-    pub seed: Option<u32>,
+    pub seeds: Option<u32>,
 }

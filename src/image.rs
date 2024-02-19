@@ -40,48 +40,47 @@ impl fmt::Display for VisualizationMode {
     }
 }
 
-impl World {
-    pub fn save_image(
-        &self,
-        mode: VisualizationMode,
-        file_name: Option<String>,
-        debug: bool
-    ) -> () {
-        let mut log = String::from("altitude,temperature,humidity\n");
-        let mut img = RgbImage::new(self.width, self.height);
+pub fn save_image(
+    world: &World,
+    mode: VisualizationMode,
+    file_name: Option<String>,
+    debug: bool
+) -> () {
+    let mut log = String::from("altitude,temperature,humidity\n");
+    let mut img = RgbImage::new(world.width, world.height);
 
-        // TODO: refactor to use PathBuf and if-let syntax ?
-        let file_name: String = match file_name {
-            Some(name) => format!("{}-{}-{}", Local::now().format(DATE_FORMAT), name, mode),
-            None => format!("{}-{}-{}", Local::now().format(DATE_FORMAT), self.seed, mode),
-        };
-        
-        for tile in &self.tiles {
-            img.put_pixel(tile.x, tile.y, tile.rgb(&mode));
-            if debug { log.push_str(&format!("{},{},{}\n", tile.altitude, tile.temperature, tile.humidity)); };
-        }
-
-        if debug {
-            let log_file: String = format!("/home/tsrodr/Run/civ-sim/logs/{}.log", &file_name);
-            std::fs::write(log_file, log).unwrap();
-            println!("[MapGen] Writing log to file {}.log", &file_name);
-        }
-
-        println!("[MapGen] Writing image to file {}.png", &file_name);
-        _ = image::save_buffer(
-            format!("/home/tsrodr/Run/civ-sim/images/{}.png", &file_name),
-            &img,
-            self.width,
-            self.height,
-            Rgb8
-        );
+    // TODO: refactor to use PathBuf and if-let syntax ?
+    let file_name: String = match file_name {
+        Some(name) => format!("{}-{}-{}", Local::now().format(DATE_FORMAT), name, mode),
+        None => format!("{}-{}-{}", Local::now().format(DATE_FORMAT), world.seeds[0], mode), // change
+                                                                                            // later
+    };
+    
+    for tile in &world.tiles {
+        img.put_pixel(tile.x, tile.y, tile.rgb(&mode));
+        if debug { log.push_str(&format!("{},{},{}\n", tile.altitude, tile.temperature, tile.humidity)); };
     }
+
+    if debug {
+        let log_file: String = format!("/home/tsrodr/Run/civ-sim/logs/{}.log", &file_name);
+        std::fs::write(log_file, log).unwrap();
+        println!("[MapGen] Writing log to file {}.log", &file_name);
+    }
+
+    println!("[MapGen] Writing image to file {}.png", &file_name);
+    _ = image::save_buffer(
+        format!("/home/tsrodr/Run/civ-sim/images/{}.png", &file_name),
+        &img,
+        world.width,
+        world.height,
+        Rgb8
+    );
 }
 
 impl Tile {
     pub fn rgb(&self, mode: &VisualizationMode) -> Rgb<u8> {
         match mode {
-            VisualizationMode::Altitude => {
+            VisualizationMode::Debug=> {
                 if                             self.altitude <=  98 { Rgb([150, 150, 150]) } // mountains
                 else if  98 < self.altitude && self.altitude <= 110 { Rgb([ 25,  75,   0]) } // hills
                 else if 110 < self.altitude && self.altitude <= 134 { Rgb([ 50, 100,   0]) } // plains
@@ -100,10 +99,16 @@ impl Tile {
                     Biome::Unset =>     Rgb([255,   0,   0]),
                 }
             },
-            VisualizationMode::Debug => {
-                Rgb([self.altitude, self.temperature, self.humidity])
-            }
-            _ => { Rgb([self.altitude, self.altitude, self.altitude]) },
+            VisualizationMode::Altitude => {
+                Rgb([self.altitude, self.altitude, self.altitude])
+            },
+            VisualizationMode::Humidity => {
+                Rgb([0, 0, self.humidity])
+            },
+            VisualizationMode::Temperature=> {
+                Rgb([self.temperature, 0, 0])
+            },
+            _ => unreachable!(),
         }
     }
 }

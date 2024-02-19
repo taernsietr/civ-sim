@@ -4,7 +4,7 @@ use rayon::prelude::*;
 use crate::{
     map::world::World,
     utils::cli::Args,
-    image::VisualizationMode,
+    image::{save_image, VisualizationMode}
 };
 
 pub mod utils;
@@ -27,20 +27,29 @@ fn main() {
     let mut rng = rand::thread_rng();
     
     for i in 0..args.variations {
-        let seed = if args.seed.is_none() { 
-            rng.gen::<u32>()
+        let seeds = if args.seeds.is_none() { 
+            [
+                rng.gen::<u32>(),
+                rng.gen::<u32>(),
+                rng.gen::<u32>()
+            ]
         } else { 
-            args.seed.unwrap()
+            [
+                args.seeds.unwrap(),
+                args.seeds.unwrap() + 1,
+                args.seeds.unwrap() + 2
+            ]
         };
 
-        println!("[MapGen] Building world no. {} using seed [{}]...", i, &seed);
-        worlds.push(World::new(seed, args.x, args.y));
+        println!("[MapGen] Building world no. {} using given seed(s)...", i);
+        worlds.push(World::new(seeds, args.x, args.y));
     }
 
-    // for world in worlds {
     worlds.par_iter().for_each(|world| {
-        // world.save_image(VisualizationMode::Debug, args.file.clone(), args.debug);
-        // world.save_image(VisualizationMode::Altitude, args.file.clone(), args.debug);
-        world.save_image(VisualizationMode::Biome, args.file.clone(), args.debug);
+        // save_image(world, VisualizationMode::Debug, args.file.clone(), args.debug);
+        save_image(world, VisualizationMode::Altitude, args.file.clone(), args.debug);
+        save_image(world, VisualizationMode::Temperature, args.file.clone(), args.debug);
+        save_image(world, VisualizationMode::Humidity, args.file.clone(), args.debug);
+        save_image(world, VisualizationMode::Biome, args.file.clone(), args.debug);
     });
 }
