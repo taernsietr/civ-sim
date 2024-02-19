@@ -1,10 +1,11 @@
 // use std::path::PathBuf;
 use std::fmt;
 use chrono::Local;
-use image::{
+use nannou::image::{
     RgbImage,
     Rgb,
-    ColorType::Rgb8
+    ColorType::Rgb8,
+    save_buffer
 };
 use crate::map::{
     world::World,
@@ -41,6 +42,17 @@ impl fmt::Display for VisualizationMode {
     }
 }
 
+pub fn generate_image(
+    world: &World,
+    mode: VisualizationMode,
+) -> RgbImage {
+    let mut img = RgbImage::new(world.width, world.height);
+    for tile in &world.tiles {
+        img.put_pixel(tile.x as u32, tile.y as u32, tile.rgb(&mode));
+    }
+    img
+}
+
 pub fn save_image(
     world: &World,
     mode: VisualizationMode,
@@ -50,7 +62,7 @@ pub fn save_image(
     let mut log = String::from("altitude,temperature,humidity\n");
     let mut img = RgbImage::new(world.width, world.height);
 
-    // TODO: refactor to use PathBuf and if-let syntax ?
+    // TODO: refactor to PathBuf
     let file_name: String = match file_name {
         Some(name) => format!("{}-{}-{}", Local::now().format(DATE_FORMAT), name, mode),
         None => format!("{}-{}-{}", Local::now().format(DATE_FORMAT), world.seeds[0], mode), // change later
@@ -68,7 +80,7 @@ pub fn save_image(
     }
 
     println!("[MapGen] Writing image to file {}.png", &file_name);
-    _ = image::save_buffer(
+    _ = save_buffer(
         format!("/home/tsrodr/Run/civ-sim/images/{}.png", &file_name),
         &img,
         world.width,
