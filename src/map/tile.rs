@@ -38,8 +38,8 @@ impl Tile {
         let humidity = noise[2].get([x / HUMIDITY_SCALE, y / HUMIDITY_SCALE]);
             
         let sea_level = 0.0;
-        let swamp_humidity = 0.6;
-        let desert_humidity = 0.0;
+        let swamp_humidity = 0.55;
+        let desert_humidity = -0.2;
         let hill_altitude = 0.3;
         let mountain_altitude = 0.5;
 
@@ -53,12 +53,6 @@ impl Tile {
             else { Biome::Coast }
         };
 
-        /*
-           altitude = 0.12957644594934173
-           temperature = -0.5813534064277605
-           humidity = 0.5008365702790374
-        */
-            
         Tile {
             x,
             y,

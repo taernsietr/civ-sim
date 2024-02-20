@@ -118,13 +118,13 @@ impl Tile {
             },
             VisualizationMode::Biome => {
                 match self.biome {
-                    Biome::Grassland => [  0, 153,   0],
+                    Biome::Grassland => [  0, 150,   0],
                     Biome::Swamp =>     [ 75, 100,   0],
                     Biome::Coast =>     [  0,  50, 100],
                     Biome::Hills =>     [ 96,  96,  64],
-                    Biome::Desert =>    [255, 204, 153],
+                    Biome::Desert =>    [255, 200, 150],
                     Biome::Sea =>       [  0,   0, 100],
-                    Biome::Mountain =>  [128, 128, 196],
+                    Biome::Mountain =>  [128, 128, 128],
                 }
             },
             VisualizationMode::Altitude => {
