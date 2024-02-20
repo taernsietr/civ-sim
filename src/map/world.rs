@@ -44,14 +44,21 @@ impl World {
                 let noise = noise.clone();
                 let parameters = parameters.clone();
                 pool.execute(move || {
-                    let tile = Tile::new(x as f64, y as f64, &noise, &parameters);
+                    let tile = Tile::new(
+                        x as u32 + width * y as u32,
+                        x as f64,
+                        y as f64,
+                        &noise,
+                        &parameters
+                    );
                     tx.send(tile).unwrap();
                 });
             }
         }
 
         drop(tx);
-        let tiles = rx.iter().collect::<Vec<Tile>>();
+        let mut tiles = rx.iter().collect::<Vec<Tile>>();
+        tiles.sort();
 
         World { 
             seeds,

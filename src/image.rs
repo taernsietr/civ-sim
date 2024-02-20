@@ -52,23 +52,28 @@ pub fn generate_image(
 }
 
 pub fn create_coast(world: &World, image: &mut RgbImage) {
-    let h = world.height as usize;
-    let world_size = h * world.width as usize; 
+    let width = world.width as usize;
+    let world_size = world.height as usize * width; 
 
     for (i, tile) in world.tiles.iter().enumerate() {
         if matches!(tile.biome, Biome::Sea) {
             let indices = 
-                if i == 0                       { vec!(i+1, i+h) }            // first tile 
-                else if i < h                   { vec!(i-1, i+1, i+h) }       // first row
-                else if i == world_size - 1     { vec!(i-h, i-1) }            // last tile
-                else if i >= world_size - 1 - h { vec!(i-h, i-1, i+1) }       // last row
-                else                            { vec!(i-h, i-1, i+1, i+h) }; // elsewhere
-            let mut adjacency = 0;
-            for j in &indices {
-                if matches!(world.tiles[*j].biome, Biome::Sea) {}
-                else { adjacency += 1 };
-                if adjacency >= 2 { image.put_pixel(tile.x as u32, tile.y as u32, Rgb([0,50,100])); }
-            }
+                if i == 0                                { vec!(i+1, i+width)               }  // first tile 
+                else if i == width                       { vec!(i-1, i+width)               }  // last tile of first row
+                else if i == world_size - 1              { vec!(i-1, i-width)               }  // last tile
+                else if i == world_size - width          { vec!(i+1, i-width)               }  // first tile of last row
+                else if i < width                        { vec!(i-1, i+1, i+width)          }  // first row
+                else if i % width == 0                   { vec!(i+1, i-width, i+width)      }  // first tile of row
+                else if i > world_size - width           { vec!(i-1, i+1, i-width)          }  // last row
+                else if i % width == width-1             { vec!(i-1, i-width, i+width)      }  // last tile of row
+                else                                     { vec!(i-1, i+1, i-width, i+width) }; // elsewhere
+//              else { vec!() };
+                for j in &indices {
+                    if !matches!(world.tiles[*j].biome, Biome::Sea) {
+                        image.put_pixel(tile.x as u32, tile.y as u32, Rgb([255,0,0]));
+                    };
+                    //Rgb([0,50,100])
+                }
         };
     }
 }

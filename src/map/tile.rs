@@ -18,6 +18,7 @@ pub enum Biome {
 
 #[derive(Debug)]
 pub struct Tile {
+    pub id: u32,
     pub x: f64,
     pub y: f64,
     pub altitude: f64,
@@ -28,6 +29,7 @@ pub struct Tile {
 
 impl Tile {
     pub fn new(
+        id: u32,
         x: f64,
         y: f64,
         noise: &[noise::Fbm<noise::OpenSimplex>; 3],
@@ -54,6 +56,7 @@ impl Tile {
         };
 
         Tile {
+            id,
             x,
             y,
             altitude,
@@ -64,3 +67,22 @@ impl Tile {
     }
 }
 
+impl PartialEq for Tile {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
+impl Eq for Tile {}
+
+impl PartialOrd for Tile {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.id.cmp(&other.id))
+    }
+}
+
+impl Ord for Tile {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.id.cmp(&other.id)
+    }
+}
