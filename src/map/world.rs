@@ -6,11 +6,10 @@ use std::sync::mpsc::channel;
 #[derive(Clone)]
 pub struct WorldParameters {
     pub sea_level: f64,
-    pub grassland_threshold: f64,
-    pub swamp_threshold: f64,
-    pub desert_threshold: f64,
-    pub hill_threshold: f64,
-    pub mountain_threshold: f64,
+    pub swamp_humidity: f64,
+    pub desert_humidity: f64,
+    pub hill_altitude: f64,
+    pub mountain_altitude: f64
 }
 
 pub struct World {
@@ -28,9 +27,9 @@ impl World {
         parameters: WorldParameters,
     ) -> World {
         let noise = [
-            noise::Fbm::<noise::OpenSimplex>::new(seeds[0]),
-            noise::Fbm::<noise::OpenSimplex>::new(seeds[1]),
-            noise::Fbm::<noise::OpenSimplex>::new(seeds[2])
+            noise::Fbm::<noise::SuperSimplex>::new(seeds[0]),
+            noise::Fbm::<noise::SuperSimplex>::new(seeds[1]),
+            noise::Fbm::<noise::SuperSimplex>::new(seeds[2])
         ];
         let noise = Arc::new(noise);
         let parameters = Arc::new(parameters);
@@ -45,7 +44,7 @@ impl World {
                 let parameters = parameters.clone();
                 pool.execute(move || {
                     let tile = Tile::new(
-                        x as u32 + width * y as u32,
+                        x + width * y,
                         x as f64,
                         y as f64,
                         &noise,

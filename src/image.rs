@@ -1,9 +1,8 @@
-// use std::path::PathBuf;
 use std::fmt;
 use chrono::Local;
-use nannou::image::{
+use nannou::{glam::Vec2, image::{
     save_buffer, ColorType::Rgb8, Rgb, RgbImage
-};
+}};
 use crate::map::{
     world::World,
     tile::{Tile, Biome}
@@ -51,31 +50,47 @@ pub fn generate_image(
     img
 }
 
+pub fn shape_continent(world: &mut World) {
+    println!("[MapGen] Shaping continent...");
+
+
+    let pos_0 = Vec2::new(0.0, 0.0);
+    let center = Vec2::new((world.width / 2) as f32, (world.height / 2) as f32);
+    let dist_0 = pos_0.distance(center) as f64;
+    dbg!(&dist_0);
+    for tile in world.tiles.iter_mut() {
+        let position = Vec2::new(tile.x as f32, tile.y as f32);
+        let distance_from_center = position.distance(center) as f64;
+        tile.altitude *= distance_from_center / dist_0 * 5.0;
+    };
+    println!("[MapGen] Finished processing continent.");
+}
+
 pub fn create_coast(world: &World, image: &mut RgbImage) {
+    println!("[MapGen] Processing coast...");
     let width = world.width as usize;
     let world_size = world.height as usize * width; 
 
     for (i, tile) in world.tiles.iter().enumerate() {
-        if matches!(tile.biome, Biome::Sea) {
+        if matches!(&tile.biome, Biome::Sea) {
             let indices = 
                 if i == 0                                { vec!(i+1, i+width)               }  // first tile 
-                else if i == width                       { vec!(i-1, i+width)               }  // last tile of first row
+                else if i == width - 1                   { vec!(i-1, i+width)               }  // last tile of first row
                 else if i == world_size - 1              { vec!(i-1, i-width)               }  // last tile
                 else if i == world_size - width          { vec!(i+1, i-width)               }  // first tile of last row
-                else if i < width                        { vec!(i-1, i+1, i+width)          }  // first row
                 else if i % width == 0                   { vec!(i+1, i-width, i+width)      }  // first tile of row
+                else if i % width == width - 1           { vec!(i-1, i-width, i+width)      }  // last tile of row
+                else if i < width                        { vec!(i-1, i+1, i+width)          }  // first row
                 else if i > world_size - width           { vec!(i-1, i+1, i-width)          }  // last row
-                else if i % width == width-1             { vec!(i-1, i-width, i+width)      }  // last tile of row
                 else                                     { vec!(i-1, i+1, i-width, i+width) }; // elsewhere
-//              else { vec!() };
                 for j in &indices {
                     if !matches!(world.tiles[*j].biome, Biome::Sea) {
-                        image.put_pixel(tile.x as u32, tile.y as u32, Rgb([255,0,0]));
+                        image.put_pixel(tile.x as u32, tile.y as u32, Rgb([0,80,160]));
                     };
-                    //Rgb([0,50,100])
                 }
         };
     }
+    println!("[MapGen] Finished processing coast.");
 }
 
 pub fn save_image(
@@ -118,15 +133,19 @@ impl Tile {
     pub fn rgb(&self, mode: &VisualizationMode) -> Rgb<u8> {
         let rgb: [u8; 3] = match mode {
             VisualizationMode::Debug => {
-                let color = [scale_f64_to_u8(self.altitude), scale_f64_to_u8(self.humidity), scale_f64_to_u8(self.temperature)];
+                let color = [
+                    scale_f64_to_u8(self.altitude),
+                    scale_f64_to_u8(self.humidity),
+                    scale_f64_to_u8(self.temperature)
+                ];
                 [color[0], color[1], color[2]]
             },
             VisualizationMode::Biome => {
                 match self.biome {
-                    Biome::Grassland => [  0, 150,   0],
-                    Biome::Swamp =>     [ 75, 100,   0],
-                    Biome::Coast =>     [  0,  50, 100],
-                    Biome::Hills =>     [ 96,  96,  64],
+                    Biome::Grassland => [ 50, 100,  60],
+                    Biome::Swamp =>     [102, 102,   0],
+                    Biome::Coast =>     [ 10,  70, 120],
+                    Biome::Hills =>     [ 84,  81,  75],
                     Biome::Desert =>    [255, 200, 150],
                     Biome::Sea =>       [  0,   0, 100],
                     Biome::Mountain =>  [128, 128, 128],
