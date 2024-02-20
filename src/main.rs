@@ -65,7 +65,6 @@ fn mouse_pressed(app: &App, model: &mut Model, _key: MouseButton) {
     model.texture = Texture::from_image(app, &converted);
 }
 
-
 fn view(app: &App, model: &Model, frame: Frame) {
     frame.clear(BLACK);
     let draw = app.draw();

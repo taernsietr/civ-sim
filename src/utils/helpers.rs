@@ -34,7 +34,7 @@ pub fn generate_worlds(args: &Args) -> Vec<World> {
                 _ => unreachable!()
         };
         println!("[MapGen] Building world no. {} using seeds [{}, {}, {}]", i, seeds[0], seeds[1], seeds[2]);
-        worlds.push(World::new(seeds, args.x, args.y, &parameters));
+        worlds.push(World::new(seeds, args.x, args.y, parameters.clone()));
     }
     worlds
 }

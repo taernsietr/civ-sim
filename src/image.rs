@@ -63,9 +63,11 @@ pub fn create_coast(world: &World, image: &mut RgbImage) {
                 else if i == world_size - 1     { vec!(i-h, i-1) }            // last tile
                 else if i >= world_size - 1 - h { vec!(i-h, i-1, i+1) }       // last row
                 else                            { vec!(i-h, i-1, i+1, i+h) }; // elsewhere
+            let mut adjacency = 0;
             for j in &indices {
-                if matches!(world.tiles[*j as usize].biome, Biome::Sea) {}
-                else { image.put_pixel(tile.x as u32, tile.y as u32, Rgb([0,50,100])); }
+                if matches!(world.tiles[*j].biome, Biome::Sea) {}
+                else { adjacency += 1 };
+                if adjacency >= 2 { image.put_pixel(tile.x as u32, tile.y as u32, Rgb([0,50,100])); }
             }
         };
     }
