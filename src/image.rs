@@ -1,8 +1,11 @@
 use std::fmt;
 use chrono::Local;
-use nannou::{glam::Vec2, image::{
-    save_buffer, ColorType::Rgb8, Rgb, RgbImage
-}};
+use nannou::image::{
+    save_buffer,
+    ColorType::Rgb8,
+    Rgb,
+    RgbImage
+};
 use crate::map::{
     world::World,
     tile::{Tile, Biome}
@@ -40,33 +43,18 @@ impl fmt::Display for VisualizationMode {
 
 pub fn generate_image(
     world: &World,
-    mode: VisualizationMode,
+    mode: &VisualizationMode,
 ) -> RgbImage {
     let mut img = RgbImage::new(world.width, world.height);
     for tile in &world.tiles {
         img.put_pixel(tile.x as u32, tile.y as u32, tile.rgb(&mode));
     }
+    create_coast(world, &mut img);
     println!("[MapGen] Finished building image.");
     img
 }
 
-pub fn shape_continent(world: &mut World) {
-    println!("[MapGen] Shaping continent...");
-
-
-    let pos_0 = Vec2::new(0.0, 0.0);
-    let center = Vec2::new((world.width / 2) as f32, (world.height / 2) as f32);
-    let dist_0 = pos_0.distance(center) as f64;
-    dbg!(&dist_0);
-    for tile in world.tiles.iter_mut() {
-        let position = Vec2::new(tile.x as f32, tile.y as f32);
-        let distance_from_center = position.distance(center) as f64;
-        tile.altitude *= distance_from_center / dist_0 * 5.0;
-    };
-    println!("[MapGen] Finished processing continent.");
-}
-
-pub fn create_coast(world: &World, image: &mut RgbImage) {
+fn create_coast(world: &World, image: &mut RgbImage) {
     println!("[MapGen] Processing coast...");
     let width = world.width as usize;
     let world_size = world.height as usize * width; 
@@ -95,7 +83,7 @@ pub fn create_coast(world: &World, image: &mut RgbImage) {
 
 pub fn save_image(
     world: &World,
-    mode: VisualizationMode,
+    mode: &VisualizationMode,
     file_name: Option<String>,
     debug: bool
 ) {

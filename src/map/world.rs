@@ -4,6 +4,7 @@ use std::sync::{
 };
 use threadpool::ThreadPool;
 use rand::Rng;
+use nannou::glam::Vec2;
 use crate::{
     utils::cli::Args,
     map::tile::Tile
@@ -51,6 +52,7 @@ impl World {
         let pool = ThreadPool::new(workers);
         let (tx, rx) = channel::<Tile>();
 
+        println!("[MapGen] Building world using seeds [{}, {}, {}]", seeds[0], seeds[1], seeds[2]);
         for x in 0..width {
             for y in 0..height {
                 let tx = tx.clone();
@@ -72,8 +74,7 @@ impl World {
         drop(tx);
         let mut tiles = rx.iter().collect::<Vec<Tile>>();
         tiles.sort();
-
-        println!("[MapGen] Building world using seeds [{}, {}, {}]", seeds[0], seeds[1], seeds[2]);
+        Self::shape_continent(width, height, &mut tiles);
 
         World { 
             seeds,
@@ -82,5 +83,22 @@ impl World {
             tiles,
         }
     }
+
+    fn shape_continent(width: u32, height: u32, tiles: &mut [Tile]) {
+        println!("[MapGen] Shaping continent...");
+        let pos_0 = Vec2::new(0.0, 0.0);
+        let center = Vec2::new(
+            (width / 2) as f32,
+            (height / 2) as f32
+        );
+        let dist_0 = pos_0.distance(center) as f64;
+        for tile in tiles.iter_mut() {
+            let position = Vec2::new(tile.x as f32, tile.y as f32);
+            let distance_from_center = position.distance(center) as f64;
+            tile.altitude *= distance_from_center / dist_0 * 5.0;
+        };
+        println!("[MapGen] Finished processing continent.");
+    }
+
 }
 

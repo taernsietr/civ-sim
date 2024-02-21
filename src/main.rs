@@ -1,12 +1,13 @@
 use clap::Parser;
 use nannou::prelude::*;
+use nannou::wgpu::Texture;
+use nannou::image::DynamicImage::ImageRgb8;
 use lazy_static::lazy_static;
 use crate::{
-    image::{generate_image, shape_continent, create_coast, VisualizationMode},
+    image::{generate_image, VisualizationMode},
     utils::cli::Args,
     map::world::{World, WorldParameters}
 };
-use nannou::wgpu::Texture;
 
 pub mod utils;
 pub mod map;
@@ -24,7 +25,10 @@ fn main() {
         ARGS.x,
         ARGS.y
     );
-    nannou::app(model).run();
+    nannou::app(model)
+        .loop_mode(LoopMode::Wait)
+        .update(update)
+        .run();
 }
 
 struct Model {
@@ -32,9 +36,16 @@ struct Model {
     world: World,
     texture: Texture,
     parameters: WorldParameters,
+    visual_mode: VisualizationMode,
 }
 
 fn model(app: &App) -> Model {
+    let _window = app.new_window()
+        .mouse_pressed(new_map)
+        .key_pressed(switch_mode)
+        .view(view)
+        .build()
+        .unwrap();
     let parameters = WorldParameters {
         sea_level: 0.0,
         swamp_humidity: 0.5,
@@ -42,23 +53,29 @@ fn model(app: &App) -> Model {
         hill_altitude: 0.5,
         mountain_altitude: 0.75
     };
-    let _window = app.new_window().mouse_pressed(mouse_pressed).view(view).build().unwrap();
-    let mut world = World::new(&ARGS, &parameters);
-    shape_continent(&mut world);
-    let mut image = generate_image(&world, VisualizationMode::Biome);
-    create_coast(&world, &mut image);
-    let converted = nannou::image::DynamicImage::ImageRgb8(image);
-    let texture = Texture::from_image(app, &converted);
-    Model { _window, world, texture, parameters }
+    let visual_mode = VisualizationMode::Biome;
+    let world = World::new(&ARGS, &parameters);
+    let texture = Texture::from_image(app, &ImageRgb8(generate_image(&world, &visual_mode)));
+    Model { _window, world, texture, parameters, visual_mode }
 }
 
-fn mouse_pressed(app: &App, model: &mut Model, _key: MouseButton) {
+fn new_map(app: &App, model: &mut Model, _key: MouseButton) {
     model.world = World::new(&ARGS, &model.parameters);
-    shape_continent(&mut model.world);
-    let mut image = generate_image(&model.world, VisualizationMode::Biome);
-    create_coast(&model.world, &mut image);
-    let converted = nannou::image::DynamicImage::ImageRgb8(image);
-    model.texture = Texture::from_image(app, &converted);
+    model.texture = Texture::from_image(app, &ImageRgb8(generate_image(&model.world, &model.visual_mode)));
+}
+
+fn switch_mode(app: &App, model: &mut Model, key: Key) {
+    if matches!(key, Key::Space) {
+        match model.visual_mode {
+            VisualizationMode::Biome => model.visual_mode = VisualizationMode::Altitude,
+            VisualizationMode::Altitude => model.visual_mode = VisualizationMode::Humidity,
+            VisualizationMode::Humidity => model.visual_mode = VisualizationMode::Temperature,
+            VisualizationMode::Temperature => model.visual_mode = VisualizationMode::Biome,
+            _ => unreachable!()
+        };
+        println!("[MapGen] Mode switched to {}.", model.visual_mode);
+    };
+    model.texture = Texture::from_image(app, &ImageRgb8(generate_image(&model.world, &model.visual_mode)));
 }
 
 fn view(app: &App, model: &Model, frame: Frame) {
