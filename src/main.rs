@@ -27,7 +27,6 @@ fn main() {
     );
     nannou::app(model)
         .loop_mode(LoopMode::Wait)
-        .update(update)
         .run();
 }
 
@@ -70,7 +69,8 @@ fn switch_mode(app: &App, model: &mut Model, key: Key) {
             VisualizationMode::Biome => model.visual_mode = VisualizationMode::Altitude,
             VisualizationMode::Altitude => model.visual_mode = VisualizationMode::Humidity,
             VisualizationMode::Humidity => model.visual_mode = VisualizationMode::Temperature,
-            VisualizationMode::Temperature => model.visual_mode = VisualizationMode::Biome,
+            VisualizationMode::Temperature => model.visual_mode = VisualizationMode::Debug,
+            VisualizationMode::Debug => model.visual_mode = VisualizationMode::Biome,
             _ => unreachable!()
         };
         println!("[MapGen] Mode switched to {}.", model.visual_mode);

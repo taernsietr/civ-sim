@@ -41,13 +41,10 @@ impl fmt::Display for VisualizationMode {
     }
 }
 
-pub fn generate_image(
-    world: &World,
-    mode: &VisualizationMode,
-) -> RgbImage {
+pub fn generate_image(world: &World, mode: &VisualizationMode,) -> RgbImage {
     let mut img = RgbImage::new(world.width, world.height);
     for tile in &world.tiles {
-        img.put_pixel(tile.x as u32, tile.y as u32, tile.rgb(&mode));
+        img.put_pixel(tile.x as u32, tile.y as u32, tile.rgb(mode));
     }
     create_coast(world, &mut img);
     println!("[MapGen] Finished building image.");
@@ -82,39 +79,31 @@ fn create_coast(world: &World, image: &mut RgbImage) {
 }
 
 pub fn save_image(
+    img: &RgbImage,
     world: &World,
     mode: &VisualizationMode,
-    file_name: Option<String>,
     debug: bool
 ) {
-    let mut log = String::from("altitude,temperature,humidity\n");
-    let mut img = RgbImage::new(world.width, world.height);
-
     // TODO: refactor to PathBuf
-    let file_name: String = match file_name {
-        Some(name) => format!("{}-{}-{}", Local::now().format(DATE_FORMAT), name, mode),
-        None => format!("{}-{}-{}", Local::now().format(DATE_FORMAT), world.seeds[0], mode), // change later
-    };
+    let file_name = format!("{}-{}", Local::now().format(DATE_FORMAT), mode);
     
-    for tile in &world.tiles {
-        img.put_pixel(tile.x as u32, tile.y as u32, tile.rgb(&mode));
-        if debug { log.push_str(&format!("{},{},{}\n", tile.altitude, tile.temperature, tile.humidity)); };
-    }
-
-    if debug {
-        let log_file: String = format!("/home/tsrodr/Run/civ-sim/logs/{}.log", &file_name);
-        std::fs::write(log_file, log).unwrap();
-        println!("[MapGen] Writing log to file {}.log", &file_name);
-    }
-
     println!("[MapGen] Writing image to file {}.png", &file_name);
     _ = save_buffer(
         format!("/home/tsrodr/Run/civ-sim/images/{}.png", &file_name),
-        &img,
+        img,
         world.width,
         world.height,
         Rgb8
     );
+
+    if debug {
+        let mut log = String::from("id,altitude,temperature,humidity\n");
+        for tile in &world.tiles {
+            log.push_str(&format!("{},{},{},{}\n", tile.id, tile.altitude, tile.temperature, tile.humidity));
+        }
+        std::fs::write(format!("/home/tsrodr/Run/civ-sim/logs/{}.log", &file_name), log).unwrap();
+        println!("[MapGen] Writing log to file {}.log", &file_name);
+    }
 }
 
 impl Tile {
