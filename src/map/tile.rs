@@ -1,10 +1,6 @@
 use noise::NoiseFn;
 use super::world::WorldParameters;
 
-const ALTITUDE_SCALE: f64 = 1200.0;
-const TEMPERATURE_SCALE: f64 = 700.0;
-const HUMIDITY_SCALE: f64 = 800.0;
-
 #[derive(Debug)]
 pub enum Biome {
     Grassland,
@@ -35,9 +31,9 @@ impl Tile {
         noise: &[noise::Fbm<noise::SuperSimplex>; 3],
         parameters: &WorldParameters
     ) -> Tile {
-        let altitude = noise[0].get([x / ALTITUDE_SCALE, y / ALTITUDE_SCALE]);
-        let temperature = noise[1].get([x / TEMPERATURE_SCALE, y / TEMPERATURE_SCALE]);
-        let humidity = noise[2].get([x / HUMIDITY_SCALE, y / HUMIDITY_SCALE]);
+        let altitude = noise[0].get([x / parameters.altitude_scale, y / parameters.altitude_scale]);
+        let temperature = noise[1].get([x / parameters.temperature_scale, y / parameters.temperature_scale]);
+        let humidity = noise[2].get([x / parameters.humidity_scale, y / parameters.humidity_scale]);
             
         let sea_level = parameters.sea_level;
         let swamp_humidity = parameters.swamp_humidity;

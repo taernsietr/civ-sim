@@ -50,7 +50,10 @@ fn model(app: &App) -> Model {
         swamp_humidity: 0.5,
         desert_humidity: -0.5,
         hill_altitude: 0.5,
-        mountain_altitude: 0.75
+        mountain_altitude: 0.75,
+        altitude_scale: 500.0,
+        temperature_scale: 500.0,
+        humidity_scale: 500.0,
     };
     let visual_mode = VisualizationMode::Biome;
     let world = World::new(&ARGS, &parameters);

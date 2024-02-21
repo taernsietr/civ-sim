@@ -16,7 +16,10 @@ pub struct WorldParameters {
     pub swamp_humidity: f64,
     pub desert_humidity: f64,
     pub hill_altitude: f64,
-    pub mountain_altitude: f64
+    pub mountain_altitude: f64,
+    pub altitude_scale: f64,
+    pub temperature_scale: f64,
+    pub humidity_scale: f64
 }
 
 pub struct World {
