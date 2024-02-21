@@ -12,14 +12,14 @@ use crate::{
 
 #[derive(Clone)]
 pub struct WorldParameters {
-    pub sea_level: f64,
-    pub swamp_humidity: f64,
-    pub desert_humidity: f64,
-    pub hill_altitude: f64,
-    pub mountain_altitude: f64,
-    pub altitude_scale: f64,
-    pub temperature_scale: f64,
-    pub humidity_scale: f64
+    pub sea_level: f32,
+    pub swamp_humidity: f32,
+    pub desert_humidity: f32,
+    pub hill_altitude: f32,
+    pub mountain_altitude: f32,
+    pub altitude_scale: f32,
+    pub temperature_scale: f32,
+    pub humidity_scale: f32
 }
 
 pub struct World {
@@ -64,10 +64,12 @@ impl World {
                 pool.execute(move || {
                     let tile = Tile::new(
                         x + width * y,
-                        x as f64,
-                        y as f64,
+                        x as f32,
+                        y as f32,
                         &noise,
-                        &parameters
+                        &parameters,
+                        &width,
+                        &height
                     );
                     tx.send(tile).unwrap();
                 });
@@ -77,7 +79,7 @@ impl World {
         drop(tx);
         let mut tiles = rx.iter().collect::<Vec<Tile>>();
         tiles.sort();
-        Self::shape_continent(width, height, &mut tiles);
+        //Self::shape_continent(width, height, &mut tiles);
 
         World { 
             seeds,
@@ -87,18 +89,19 @@ impl World {
         }
     }
 
-    fn shape_continent(width: u32, height: u32, tiles: &mut [Tile]) {
+    fn _shape_continent(width: u32, height: u32, tiles: &mut [Tile]) {
         println!("[MapGen] Shaping continent...");
         let pos_0 = Vec2::new(0.0, 0.0);
         let center = Vec2::new(
             (width / 2) as f32,
             (height / 2) as f32
         );
-        let dist_0 = pos_0.distance(center) as f64;
+        let dist_0 = pos_0.distance(center);
         for tile in tiles.iter_mut() {
-            let position = Vec2::new(tile.x as f32, tile.y as f32);
-            let distance_from_center = position.distance(center) as f64;
-            tile.altitude *= distance_from_center / dist_0 * 5.0;
+            let position = Vec2::new(tile.x, tile.y);
+            let distance_from_center = position.distance(center);
+            //tile.altitude *= distance_from_center / dist_0 * 5.0;
+            tile.altitude *= distance_from_center / dist_0;
         };
         println!("[MapGen] Finished processing continent.");
     }

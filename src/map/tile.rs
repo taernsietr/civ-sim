@@ -1,6 +1,8 @@
 use noise::NoiseFn;
 use super::world::WorldParameters;
 
+use nannou::glam::Vec2;
+
 #[derive(Debug)]
 pub enum Biome {
     Grassland,
@@ -15,25 +17,27 @@ pub enum Biome {
 #[derive(Debug)]
 pub struct Tile {
     pub id: u32,
-    pub x: f64,
-    pub y: f64,
-    pub altitude: f64,
-    pub temperature: f64,
-    pub humidity: f64,
+    pub x: f32,
+    pub y: f32,
+    pub altitude: f32,
+    pub temperature: f32,
+    pub humidity: f32,
     pub biome: Biome,
 }
 
 impl Tile {
     pub fn new(
         id: u32,
-        x: f64,
-        y: f64,
+        x: f32,
+        y: f32,
         noise: &[noise::Fbm<noise::SuperSimplex>; 3],
-        parameters: &WorldParameters
+        parameters: &WorldParameters,
+        width: &u32,
+        height: &u32
     ) -> Tile {
-        let altitude = noise[0].get([x / parameters.altitude_scale, y / parameters.altitude_scale]);
-        let temperature = noise[1].get([x / parameters.temperature_scale, y / parameters.temperature_scale]);
-        let humidity = noise[2].get([x / parameters.humidity_scale, y / parameters.humidity_scale]);
+        let mut altitude = noise[0].get([(x / parameters.altitude_scale) as f64, (y / parameters.altitude_scale) as f64]) as f32;
+        let temperature = noise[1].get([(x / parameters.temperature_scale) as f64, (y / parameters.temperature_scale) as f64]) as f32;
+        let humidity = noise[2].get([(x / parameters.humidity_scale) as f64, (y / parameters.humidity_scale) as f64]) as f32;
             
         let sea_level = parameters.sea_level;
         let swamp_humidity = parameters.swamp_humidity;
@@ -41,6 +45,16 @@ impl Tile {
         let hill_altitude = parameters.hill_altitude;
         let mountain_altitude = parameters.mountain_altitude;
 
+        let pos_0 = Vec2::new(0.0, 0.0);
+        let center = Vec2::new(
+            (width / 2) as f32,
+            (height / 2) as f32
+        );
+        let dist_0 = pos_0.distance(center);
+        let position = Vec2::new(x, y);
+        let distance_from_center = position.distance(center);
+        altitude -= (distance_from_center/dist_0)/5.0;
+        
         let biome = {
             if altitude <= sea_level { Biome::Sea }
             else if mountain_altitude > altitude && altitude >= hill_altitude { Biome::Hills }

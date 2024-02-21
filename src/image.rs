@@ -1,16 +1,13 @@
 use std::fmt;
 use chrono::Local;
 use nannou::image::{
-    save_buffer,
-    ColorType::Rgb8,
-    Rgb,
-    RgbImage
+    save_buffer, ColorType::Rgb8, Rgb, RgbImage
 };
 use crate::map::{
     world::World,
     tile::{Tile, Biome}
 };
-use crate::utils::helpers::scale_f64_to_u8;
+use crate::utils::helpers::scale_f32_to_u8;
 
 const DATE_FORMAT: &str = "%y%m%d-%Hh%M";
 
@@ -111,9 +108,9 @@ impl Tile {
         let rgb: [u8; 3] = match mode {
             VisualizationMode::Debug => {
                 let color = [
-                    scale_f64_to_u8(self.altitude),
-                    scale_f64_to_u8(self.humidity),
-                    scale_f64_to_u8(self.temperature)
+                    scale_f32_to_u8(self.altitude),
+                    scale_f32_to_u8(self.humidity),
+                    scale_f32_to_u8(self.temperature)
                 ];
                 [color[0], color[1], color[2]]
             },
@@ -129,15 +126,15 @@ impl Tile {
                 }
             },
             VisualizationMode::Altitude => {
-                let color = scale_f64_to_u8(self.altitude);
+                let color = scale_f32_to_u8(self.altitude);
                 [color, color, color]
             },
             VisualizationMode::Humidity => {
-                let color = scale_f64_to_u8(self.humidity);
+                let color = scale_f32_to_u8(self.humidity);
                 [0, 0, color]
             },
             VisualizationMode::Temperature=> {
-                let color = scale_f64_to_u8(self.temperature);
+                let color = scale_f32_to_u8(self.temperature);
                 [color, 0, 0]
             },
             _ => unreachable!()
