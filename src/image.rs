@@ -98,9 +98,10 @@ pub fn save_image(
         for tile in &world.tiles {
             log.push_str(&format!("{},{},{},{}\n", tile.id, tile.altitude, tile.temperature, tile.humidity));
         }
-        std::fs::write(format!("/home/tsrodr/Run/civ-sim/logs/{}.log", &file_name), log).unwrap();
         println!("[MapGen] Writing log to file {}.log", &file_name);
+        std::fs::write(format!("/home/tsrodr/Run/civ-sim/logs/{}.log", &file_name), log).unwrap();
     }
+    println!("[MapGen] Map saved!");
 }
 
 impl Tile {
@@ -116,13 +117,17 @@ impl Tile {
             },
             VisualizationMode::Biome => {
                 match self.biome {
-                    Biome::Grassland => [ 50, 100,  60],
-                    Biome::Swamp =>     [102, 102,   0],
+                    Biome::Forest =>    [  0,  50,   0],
+                    Biome::Glacier =>   [255, 255, 255],
+                    Biome::Peaks =>     [200, 200, 200],
+                    Biome::Tundra =>    [170, 170, 255],
+                    Biome::Grassland => [ 60, 100,   0],
+                    Biome::Swamp =>     [100, 100,  80],
                     Biome::Coast =>     [ 10,  70, 120],
-                    Biome::Hills =>     [ 84,  81,  75],
+                    Biome::Hills =>     [120, 120, 175],
                     Biome::Desert =>    [255, 200, 150],
                     Biome::Sea =>       [  0,   0, 100],
-                    Biome::Mountain =>  [128, 128, 128],
+                    Biome::Mountain =>  [150, 150, 150],
                 }
             },
             VisualizationMode::Altitude => {

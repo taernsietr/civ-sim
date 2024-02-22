@@ -4,9 +4,7 @@ use nannou::wgpu::Texture;
 use nannou::image::DynamicImage::ImageRgb8;
 use lazy_static::lazy_static;
 use crate::{
-    image::{generate_image, VisualizationMode},
-    utils::cli::Args,
-    map::world::{World, WorldParameters}
+    image::{generate_image, save_image, VisualizationMode}, map::world::{World, WorldParameters}, utils::cli::Args
 };
 
 pub mod utils;
@@ -41,16 +39,21 @@ struct Model {
 fn model(app: &App) -> Model {
     let _window = app.new_window()
         .mouse_pressed(new_map)
-        .key_pressed(switch_mode)
+        .key_pressed(handle_keys)
         .view(view)
         .build()
         .unwrap();
     let parameters = WorldParameters {
         sea_level: 0.0,
-        swamp_humidity: 0.5,
-        desert_humidity: -0.5,
-        hill_altitude: 0.5,
-        mountain_altitude: 0.75,
+        peak_height: 0.9,
+        mountain_height: 0.7,
+        hills_height: 0.6,
+        glacier_temp: -0.8,
+        grassland_threshold: 0.2,
+        forest_threshold: 0.4,
+        swamp_threshold: 0.6,
+        tundra_low_t: -0.6,
+        tundra_high_t: -0.4,
         altitude_scale: 500.0,
         temperature_scale: 500.0,
         humidity_scale: 500.0,
@@ -66,7 +69,7 @@ fn new_map(app: &App, model: &mut Model, _key: MouseButton) {
     model.texture = Texture::from_image(app, &ImageRgb8(generate_image(&model.world, &model.visual_mode)));
 }
 
-fn switch_mode(app: &App, model: &mut Model, key: Key) {
+fn handle_keys(app: &App, model: &mut Model, key: Key) {
     if matches!(key, Key::Space) {
         match model.visual_mode {
             VisualizationMode::Biome => model.visual_mode = VisualizationMode::Altitude,
@@ -77,8 +80,12 @@ fn switch_mode(app: &App, model: &mut Model, key: Key) {
             _ => unreachable!()
         };
         println!("[MapGen] Mode switched to {}.", model.visual_mode);
+        model.texture = Texture::from_image(app, &ImageRgb8(generate_image(&model.world, &model.visual_mode)));
     };
-    model.texture = Texture::from_image(app, &ImageRgb8(generate_image(&model.world, &model.visual_mode)));
+
+    if matches!(key, Key::S) {
+        save_image(&generate_image(&model.world, &model.visual_mode), &model.world, &model.visual_mode, ARGS.debug);
+    }
 }
 
 fn view(app: &App, model: &Model, frame: Frame) {

@@ -1,17 +1,20 @@
+use nannou::math::num_traits::Pow;
 use noise::NoiseFn;
 use super::world::WorldParameters;
 
-use nannou::glam::Vec2;
-
 #[derive(Debug)]
 pub enum Biome {
-    Grassland,
-    Swamp,
-    Desert,
-    Sea,
-    Hills,
-    Mountain,
     Coast,
+    Desert,
+    Forest,
+    Grassland,
+    Hills,
+    Glacier,
+    Mountain,
+    Peaks,
+    Sea,
+    Swamp,
+    Tundra,
 }
 
 #[derive(Debug)]
@@ -31,47 +34,34 @@ impl Tile {
         x: f32,
         y: f32,
         noise: &[noise::Fbm<noise::SuperSimplex>; 3],
-        parameters: &WorldParameters,
-        width: &u32,
-        height: &u32
+        params: &WorldParameters,
+        _width: &u32,
+        _height: &u32
     ) -> Tile {
-        let mut altitude = noise[0].get([(x / parameters.altitude_scale) as f64, (y / parameters.altitude_scale) as f64]) as f32;
-        let temperature = noise[1].get([(x / parameters.temperature_scale) as f64, (y / parameters.temperature_scale) as f64]) as f32;
-        let humidity = noise[2].get([(x / parameters.humidity_scale) as f64, (y / parameters.humidity_scale) as f64]) as f32;
-            
-        let sea_level = parameters.sea_level;
-        let swamp_humidity = parameters.swamp_humidity;
-        let desert_humidity = parameters.desert_humidity;
-        let hill_altitude = parameters.hill_altitude;
-        let mountain_altitude = parameters.mountain_altitude;
+        let h = noise[0].get([(x / params.altitude_scale) as f64, (y / params.altitude_scale) as f64]) as f32;
+        let t = noise[1].get([(x / params.temperature_scale) as f64, (y / params.temperature_scale) as f64]) as f32;
+        let w = noise[2].get([(x / params.humidity_scale) as f64, (y / params.humidity_scale) as f64]) as f32;
 
-        let pos_0 = Vec2::new(0.0, 0.0);
-        let center = Vec2::new(
-            (width / 2) as f32,
-            (height / 2) as f32
-        );
-        let dist_0 = pos_0.distance(center);
-        let position = Vec2::new(x, y);
-        let distance_from_center = position.distance(center);
-        altitude -= (distance_from_center/dist_0)/5.0;
-        
         let biome = {
-            if altitude <= sea_level { Biome::Sea }
-            else if mountain_altitude > altitude && altitude >= hill_altitude { Biome::Hills }
-            else if altitude >= mountain_altitude { Biome::Mountain }
-            else if humidity <= desert_humidity { Biome::Desert }
-            else if swamp_humidity < humidity && humidity > desert_humidity { Biome::Grassland}
-            else if swamp_humidity >= humidity { Biome::Swamp }
-            else { Biome::Coast }
+            if      h >= params.peak_height                                                                  { Biome::Peaks }
+            else if h >= params.mountain_height                                                              { Biome::Mountain }
+            else if h >= params.hills_height                                                                 { Biome::Hills }
+            else if t <  params.glacier_temp                                                                 { Biome::Glacier }
+            else if h <= params.sea_level                                                                    { Biome::Sea }
+            else if (h.pow(2.0) + t.pow(2.0) + w.pow(2.0)) <= params.grassland_threshold                     { Biome::Grassland }
+            else if (h.pow(2.0) + t.pow(2.0)) == w && t > params.tundra_low_t && t < params.tundra_high_t    { Biome::Tundra }
+            else if (h.pow(2.0) + t.pow(2.0))/2.0 + w.pow(2.0) <= params.forest_threshold && w >= 0.0        { Biome::Forest }
+            else if (h.pow(2.0) + t.pow(2.0))/2.0 + (4.0 * w.pow(2.0)) <= params.swamp_threshold && w >= 0.0 { Biome::Swamp }
+            else                                                                                             { Biome::Desert }
         };
 
         Tile {
             id,
             x,
             y,
-            altitude,
-            temperature,
-            humidity,
+            altitude: h,
+            temperature: t,
+            humidity: w,
             biome
         }
     }

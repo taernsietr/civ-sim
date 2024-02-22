@@ -13,10 +13,15 @@ use crate::{
 #[derive(Clone)]
 pub struct WorldParameters {
     pub sea_level: f32,
-    pub swamp_humidity: f32,
-    pub desert_humidity: f32,
-    pub hill_altitude: f32,
-    pub mountain_altitude: f32,
+    pub peak_height: f32,
+    pub mountain_height: f32,
+    pub hills_height: f32,
+    pub glacier_temp: f32,
+    pub grassland_threshold: f32,
+    pub forest_threshold: f32,
+    pub swamp_threshold: f32,
+    pub tundra_low_t: f32,
+    pub tundra_high_t: f32,
     pub altitude_scale: f32,
     pub temperature_scale: f32,
     pub humidity_scale: f32
@@ -79,7 +84,6 @@ impl World {
         drop(tx);
         let mut tiles = rx.iter().collect::<Vec<Tile>>();
         tiles.sort();
-        //Self::shape_continent(width, height, &mut tiles);
 
         World { 
             seeds,
