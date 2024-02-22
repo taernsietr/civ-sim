@@ -45,14 +45,14 @@ fn model(app: &App) -> Model {
         .unwrap();
     let parameters = WorldParameters {
         sea_level: 0.0,
-        peak_height: 0.9,
-        mountain_height: 0.7,
+        peak_height: 1.0,
+        mountain_height: 0.8,
         hills_height: 0.6,
-        glacier_temp: -0.8,
-        grassland_threshold: 0.2,
-        forest_threshold: 0.4,
-        swamp_threshold: 0.6,
-        tundra_low_t: -0.6,
+        glacier_temp: -1.0,
+        grassland_threshold: 0.5,
+        forest_threshold: 0.6,
+        swamp_threshold: 0.4,
+        tundra_low_t: -0.4,
         tundra_high_t: -0.4,
         altitude_scale: 500.0,
         temperature_scale: 500.0,
@@ -76,7 +76,8 @@ fn handle_keys(app: &App, model: &mut Model, key: Key) {
             VisualizationMode::Altitude => model.visual_mode = VisualizationMode::Humidity,
             VisualizationMode::Humidity => model.visual_mode = VisualizationMode::Temperature,
             VisualizationMode::Temperature => model.visual_mode = VisualizationMode::Debug,
-            VisualizationMode::Debug => model.visual_mode = VisualizationMode::Biome,
+            VisualizationMode::Debug => model.visual_mode = VisualizationMode::EquatorDistance,
+            VisualizationMode::EquatorDistance => model.visual_mode = VisualizationMode::Biome,
             _ => unreachable!()
         };
         println!("[MapGen] Mode switched to {}.", model.visual_mode);

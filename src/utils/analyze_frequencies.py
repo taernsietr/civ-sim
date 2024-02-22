@@ -2,11 +2,12 @@ import sys
 import matplotlib.pyplot as plt
 
 with open(sys.argv[1], 'r') as f:
-    lines = f.readlines()
+    lines = f.readlines()[2:]
 
-data = [int(x.strip()) for x in lines]
+def scale(x):
+  return int(((float(x)+1)/2) * 255)
 
-# data = [x for x in data if x >= min_val and x <= max_val]
+data = [x.strip().split(",")[1:] for x in lines]
+joined = [scale(x) for y in data for x in y]
 
-plt.hist(data, bins=255)
-plt.savefig(f'{sys.argv[1]}.png')
+plt.hist(joined, bins=255)

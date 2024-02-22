@@ -21,6 +21,7 @@ pub enum VisualizationMode {
     Hardness,
     Sunlight,
     Debug,
+    EquatorDistance,
 }
 
 impl fmt::Display for VisualizationMode {
@@ -34,6 +35,7 @@ impl fmt::Display for VisualizationMode {
             VisualizationMode::Hardness => write!(f, "hardness"),
             VisualizationMode::Sunlight => write!(f, "sunlight"),
             VisualizationMode::Debug=> write!(f, "debug"),
+            VisualizationMode::EquatorDistance=> write!(f, "equator_distance"),
         }
     }
 }
@@ -41,7 +43,7 @@ impl fmt::Display for VisualizationMode {
 pub fn generate_image(world: &World, mode: &VisualizationMode,) -> RgbImage {
     let mut img = RgbImage::new(world.width, world.height);
     for tile in &world.tiles {
-        img.put_pixel(tile.x as u32, tile.y as u32, tile.rgb(mode));
+        img.put_pixel(tile.x as u32, tile.y as u32, tile.rgb(mode, world));
     }
     create_coast(world, &mut img);
     println!("[MapGen] Finished building image.");
@@ -105,7 +107,7 @@ pub fn save_image(
 }
 
 impl Tile {
-    pub fn rgb(&self, mode: &VisualizationMode) -> Rgb<u8> {
+    pub fn rgb(&self, mode: &VisualizationMode, world: &World) -> Rgb<u8> {
         let rgb: [u8; 3] = match mode {
             VisualizationMode::Debug => {
                 let color = [
@@ -117,17 +119,18 @@ impl Tile {
             },
             VisualizationMode::Biome => {
                 match self.biome {
+                    Biome::Coast =>     [ 10,  70, 120],
+                    Biome::Desert =>    [255, 200, 150],
                     Biome::Forest =>    [  0,  50,   0],
                     Biome::Glacier =>   [255, 255, 255],
-                    Biome::Peaks =>     [200, 200, 200],
-                    Biome::Tundra =>    [170, 170, 255],
                     Biome::Grassland => [ 60, 100,   0],
-                    Biome::Swamp =>     [100, 100,  80],
-                    Biome::Coast =>     [ 10,  70, 120],
-                    Biome::Hills =>     [120, 120, 175],
-                    Biome::Desert =>    [255, 200, 150],
-                    Biome::Sea =>       [  0,   0, 100],
+                    Biome::Hills =>     [150, 120, 100],
                     Biome::Mountain =>  [150, 150, 150],
+                    Biome::Peaks =>     [200, 200, 200],
+                    Biome::Sea =>       [  0,   0, 100],
+                    Biome::Swamp =>     [100, 100,  80],
+                    Biome::Tundra =>    [170, 170, 255],
+                    Biome::Debug =>     [255,   0,   0]
                 }
             },
             VisualizationMode::Altitude => {
@@ -138,9 +141,16 @@ impl Tile {
                 let color = scale_f32_to_u8(self.humidity);
                 [0, 0, color]
             },
-            VisualizationMode::Temperature=> {
+            VisualizationMode::Temperature => {
                 let color = scale_f32_to_u8(self.temperature);
                 [color, 0, 0]
+            },
+            VisualizationMode::EquatorDistance => {
+                let equator = world.height as f32/2.0;
+                let distance_to_equator = f32::abs(equator - self.y) / equator;
+                let color = scale_f32_to_u8(distance_to_equator);
+                if color == 0 { println!("tamo vivo"); }
+                [0, color, 0]
             },
             _ => unreachable!()
         };
