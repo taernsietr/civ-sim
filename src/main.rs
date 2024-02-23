@@ -45,14 +45,14 @@ fn model(app: &App) -> Model {
         .unwrap();
     let parameters = WorldParameters {
         sea_level: 0.0,
-        peak_height: 1.0,
+        peak_height: 0.95,
         mountain_height: 0.8,
-        hills_height: 0.6,
-        glacier_temp: -1.0,
+        hills_height: 0.65,
+        glacier_temp: -0.8,
         grassland_threshold: 0.5,
-        forest_threshold: 0.6,
-        swamp_threshold: 0.4,
-        tundra_low_t: -0.4,
+        forest_threshold: 0.7,
+        swamp_threshold: 0.7,
+        tundra_low_t: -0.8,
         tundra_high_t: -0.4,
         altitude_scale: 500.0,
         temperature_scale: 500.0,
@@ -70,6 +70,7 @@ fn new_map(app: &App, model: &mut Model, _key: MouseButton) {
 }
 
 fn handle_keys(app: &App, model: &mut Model, key: Key) {
+    // SPACE: switch visualization mode
     if matches!(key, Key::Space) {
         match model.visual_mode {
             VisualizationMode::Biome => model.visual_mode = VisualizationMode::Altitude,
@@ -84,6 +85,7 @@ fn handle_keys(app: &App, model: &mut Model, key: Key) {
         model.texture = Texture::from_image(app, &ImageRgb8(generate_image(&model.world, &model.visual_mode)));
     };
 
+    // S: save current map
     if matches!(key, Key::S) {
         save_image(&generate_image(&model.world, &model.visual_mode), &model.world, &model.visual_mode, ARGS.debug);
     }

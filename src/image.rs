@@ -45,36 +45,8 @@ pub fn generate_image(world: &World, mode: &VisualizationMode,) -> RgbImage {
     for tile in &world.tiles {
         img.put_pixel(tile.x as u32, tile.y as u32, tile.rgb(mode, world));
     }
-    create_coast(world, &mut img);
     println!("[MapGen] Finished building image.");
     img
-}
-
-fn create_coast(world: &World, image: &mut RgbImage) {
-    println!("[MapGen] Processing coast...");
-    let width = world.width as usize;
-    let world_size = world.height as usize * width; 
-
-    for (i, tile) in world.tiles.iter().enumerate() {
-        if matches!(&tile.biome, Biome::Sea) {
-            let indices = 
-                if i == 0                                { vec!(i+1, i+width)               }  // first tile 
-                else if i == width - 1                   { vec!(i-1, i+width)               }  // last tile of first row
-                else if i == world_size - 1              { vec!(i-1, i-width)               }  // last tile
-                else if i == world_size - width          { vec!(i+1, i-width)               }  // first tile of last row
-                else if i % width == 0                   { vec!(i+1, i-width, i+width)      }  // first tile of row
-                else if i % width == width - 1           { vec!(i-1, i-width, i+width)      }  // last tile of row
-                else if i < width                        { vec!(i-1, i+1, i+width)          }  // first row
-                else if i > world_size - width           { vec!(i-1, i+1, i-width)          }  // last row
-                else                                     { vec!(i-1, i+1, i-width, i+width) }; // elsewhere
-                for j in &indices {
-                    if !matches!(world.tiles[*j].biome, Biome::Sea) {
-                        image.put_pixel(tile.x as u32, tile.y as u32, Rgb([0,80,160]));
-                    };
-                }
-        };
-    }
-    println!("[MapGen] Finished processing coast.");
 }
 
 pub fn save_image(
@@ -119,8 +91,8 @@ impl Tile {
             },
             VisualizationMode::Biome => {
                 match self.biome {
-                    Biome::Coast =>     [ 10,  70, 120],
-                    Biome::Desert =>    [255, 200, 150],
+                    Biome::Coast =>     [  0,  80, 160],
+                    Biome::Desert =>    [255, 210, 150],
                     Biome::Forest =>    [  0,  50,   0],
                     Biome::Glacier =>   [255, 255, 255],
                     Biome::Grassland => [ 60, 100,   0],
@@ -128,8 +100,8 @@ impl Tile {
                     Biome::Mountain =>  [150, 150, 150],
                     Biome::Peaks =>     [200, 200, 200],
                     Biome::Sea =>       [  0,   0, 100],
-                    Biome::Swamp =>     [100, 100,  80],
-                    Biome::Tundra =>    [170, 170, 255],
+                    Biome::Swamp =>     [ 70,  90,  50],
+                    Biome::Tundra =>    [160, 180, 140],
                     Biome::Debug =>     [255,   0,   0]
                 }
             },

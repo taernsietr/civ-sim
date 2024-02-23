@@ -6,6 +6,7 @@ use threadpool::ThreadPool;
 use rand::Rng;
 use nannou::glam::Vec2;
 use crate::{
+    map::tile::Biome,
     utils::cli::Args,
     map::tile::Tile
 };
@@ -84,6 +85,34 @@ impl World {
         drop(tx);
         let mut tiles = rx.iter().collect::<Vec<Tile>>();
         tiles.sort();
+
+        {
+            let mut coast_tiles = Vec::<usize>::new();
+            let width = width as usize;
+            let world_size = height as usize * width; 
+            tiles.iter().enumerate().for_each(|(i, tile)| {
+                if matches!(&tile.biome, Biome::Sea) {
+                    let indices = 
+                        if i == 0                                { vec!(i+1, i+width)               }  // first tile 
+                        else if i == width - 1                   { vec!(i-1, i+width)               }  // last tile of first row
+                        else if i == world_size - 1              { vec!(i-1, i-width)               }  // last tile
+                        else if i == world_size - width          { vec!(i+1, i-width)               }  // first tile of last row
+                        else if i % width == 0                   { vec!(i+1, i-width, i+width)      }  // first tile of row
+                        else if i % width == width - 1           { vec!(i-1, i-width, i+width)      }  // last tile of row
+                        else if i < width                        { vec!(i-1, i+1, i+width)          }  // first row
+                        else if i > world_size - width           { vec!(i-1, i+1, i-width)          }  // last row
+                        else                                     { vec!(i-1, i+1, i-width, i+width) }; // elsewhere
+                        indices.iter().for_each(|j| {
+                            if !matches!(&tiles[*j].biome, Biome::Sea) {
+                                coast_tiles.push(*j);
+                            };
+                        });
+                };
+            });
+            coast_tiles.iter().for_each(|t| {
+                tiles[*t].biome = Biome::Coast;
+            });
+        }
 
         World { 
             seeds,
