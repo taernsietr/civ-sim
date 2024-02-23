@@ -54,6 +54,7 @@ fn model(app: &App) -> Model {
         swamp_threshold: 0.7,
         tundra_low_t: -0.8,
         tundra_high_t: -0.4,
+        global_heat_scaling: 0.7,
         altitude_scale: 500.0,
         temperature_scale: 500.0,
         humidity_scale: 500.0,

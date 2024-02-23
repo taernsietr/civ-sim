@@ -1,5 +1,6 @@
 use nannou::math::num_traits::Pow;
 use noise::NoiseFn;
+use crate::utils::helpers::adjust_temperature;
 use super::world::WorldParameters;
 
 #[derive(Debug)]
@@ -34,19 +35,15 @@ impl Tile {
         id: u32,
         x: f32,
         y: f32,
+        equator: &f32,
         noise: &[noise::Fbm<noise::SuperSimplex>; 3],
         params: &WorldParameters,
-        _width: &u32,
-        height: &u32
     ) -> Tile {
         let h = (noise[0].get([(x / params.altitude_scale) as f64, (y / params.altitude_scale) as f64]) as f32).clamp(-1.0, 1.0);
-        let t = (noise[1].get([(x / params.temperature_scale) as f64, (y / params.temperature_scale) as f64]) as f32).clamp(-1.0, 1.0);
+        let mut t = (noise[1].get([(x / params.temperature_scale) as f64, (y / params.temperature_scale) as f64]) as f32).clamp(-1.0, 1.0);
         let w = (noise[2].get([(x / params.humidity_scale) as f64, (y / params.humidity_scale) as f64]) as f32).clamp(-1.0, 1.0);
 
-        let equator = *height as f32 / 2.0;
-        let distance_to_equator = f32::abs(equator - y) / equator;
-        // let mod_t = -1.0+(2.0/(1.0+20.0*distance_to_equator.pow(1.6*std::f32::consts::E)));
-        let t = (distance_to_equator*t).clamp(-1.0, distance_to_equator);
+        adjust_temperature(&mut t, equator, &y, &params.global_heat_scaling);
 
         let h2 = h.pow(2.0);
         let t2 = t.pow(2.0);

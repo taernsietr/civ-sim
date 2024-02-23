@@ -23,6 +23,7 @@ pub struct WorldParameters {
     pub swamp_threshold: f32,
     pub tundra_low_t: f32,
     pub tundra_high_t: f32,
+    pub global_heat_scaling: f32,
     pub altitude_scale: f32,
     pub temperature_scale: f32,
     pub humidity_scale: f32
@@ -32,6 +33,7 @@ pub struct World {
     pub seeds: [u32; 3],
     pub width: u32,
     pub height: u32,
+    pub equator: f32,
     pub tiles: Vec<Tile>, 
 }
 
@@ -43,6 +45,7 @@ impl World {
         let mut rng = rand::thread_rng();
         let width = args.x;
         let height = args.y;
+        let equator = (height / 2) as f32;
         let seeds = match &args.seeds {
             None => [rng.gen::<u32>(), rng.gen::<u32>(), rng.gen::<u32>()],
             Some(j) if j.len() == 1 => [j[0], rng.gen::<u32>(), rng.gen::<u32>()],
@@ -72,10 +75,9 @@ impl World {
                         x + width * y,
                         x as f32,
                         y as f32,
+                        &equator,
                         &noise,
                         &parameters,
-                        &width,
-                        &height
                     );
                     tx.send(tile).unwrap();
                 });
@@ -118,6 +120,7 @@ impl World {
             seeds,
             width,
             height,
+            equator,
             tiles,
         }
     }
