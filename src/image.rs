@@ -91,18 +91,20 @@ impl Tile {
             },
             VisualizationMode::Biome => {
                 match self.biome {
-                    Biome::Coast =>     [  0,  80, 160],
-                    Biome::Desert =>    [255, 210, 150],
-                    Biome::Forest =>    [  0,  50,   0],
-                    Biome::Glacier =>   [255, 255, 255],
-                    Biome::Grassland => [ 60, 100,   0],
-                    Biome::Hills =>     [150, 120, 100],
-                    Biome::Mountain =>  [150, 150, 150],
-                    Biome::Peaks =>     [200, 200, 200],
-                    Biome::Sea =>       [  0,   0, 100],
-                    Biome::Swamp =>     [ 70,  90,  50],
-                    Biome::Tundra =>    [160, 180, 140],
-                    Biome::Debug =>     [255,   0,   0]
+                    Biome::Coast =>      [  0,  80, 160],
+                    Biome::ColdDesert => [200, 200, 220],
+                    Biome::ColdForest => [150, 150, 100],
+                    Biome::Desert =>     [255, 210, 150],
+                    Biome::Forest =>     [  0,  50,   0],
+                    Biome::Glacier =>    [255, 255, 255],
+                    Biome::Grassland =>  [ 60, 100,   0],
+                    Biome::Hill =>       [150, 120, 100],
+                    Biome::Mountain =>   [150, 150, 150],
+                    Biome::Peak =>       [200, 200, 200],
+                    Biome::Sea =>        [  0,   0, 100],
+                    Biome::Tundra =>     [160, 180, 140],
+                    Biome::Wetland =>    [ 60,  80,  40],
+                    Biome::Debug =>      [255,   0,   0]
                 }
             },
             VisualizationMode::Altitude => {

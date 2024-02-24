@@ -6,15 +6,17 @@ use super::world::WorldParameters;
 #[derive(Debug)]
 pub enum Biome {
     Coast,
+    ColdDesert,
+    ColdForest,
     Desert,
     Forest,
     Glacier,
     Grassland,
-    Hills,
+    Hill,
     Mountain,
-    Peaks,
+    Peak,
     Sea,
-    Swamp,
+    Wetland,
     Tundra,
     Debug,
 }
@@ -45,21 +47,24 @@ impl Tile {
 
         adjust_temperature(&mut t, equator, &y, &params.global_heat_scaling);
 
-        let h2 = h.pow(2.0);
-        let t2 = t.pow(2.0);
-        let w2 = w.pow(2.0);
-
         let biome = {
-            if      h >= params.peak_height                                                { Biome::Peaks }
-            else if h >= params.mountain_height                                            { Biome::Mountain }
-            else if h >= params.hills_height                                               { Biome::Hills }
-            else if h <= params.sea_level                                                  { Biome::Sea }
-            else if t <  params.glacier_temp                                               { Biome::Glacier }
-            else if t >  params.tundra_low_t && t <= params.tundra_high_t && (w2 + t2) < h { Biome::Tundra }
-            else if (h2 + t2 + w2) <= params.grassland_threshold                           { Biome::Grassland }
-            else if w >= 0.0 && (h2 + t2)/2.0 + (4.0 * w2) <= params.swamp_threshold       { Biome::Swamp }
-            else if w >= 0.0 && (h2 + t2)/2.0 + w2 <= params.forest_threshold              { Biome::Forest }
-            else                                                                           { Biome::Desert }
+            if      h >= params.peak_height                                         { Biome::Peak }
+            else if h >= params.mountain_height                                     { Biome::Mountain }
+            else if h >= params.hills_height                                        { Biome::Hill }
+            else if h <= params.sea_level                                           { Biome::Sea }
+            else if t <  params.glacier_temp                                        { Biome::Glacier }
+            else if w >= params.wetlands_humidity                                   { Biome::Wetland }
+            else if w <  params.desert_humidity && t <= params.cold_desert_temp     { Biome::ColdDesert }
+            else if w <  params.desert_humidity                                     { Biome::Desert }
+            else if t <  params.grassland_high_t && t >= params.grassland_low_t     { Biome::Grassland }
+            else if t <  params.tundra_high_t && t >= params.tundra_low_t           { Biome::Tundra }
+            else if t <  params.forest_high_t && t >= params.forest_low_t           { Biome::Forest }
+            else if t <  params.cold_forest_high_t && t >= params.cold_forest_low_t { Biome::ColdForest }
+            else                                                                    { Biome::Debug }
+            //else if t >  params.tundra_low_t && t <= params.tundra_high_t && (w2 + t2) < h { Biome::Tundra }
+            //else if (h2 + t2 + w2) <= params.grassland_threshold                           { Biome::Grassland }
+            //else if w >= 0.0 && (h2 + t2)/2.0 + (4.0 * w2) <= params.swamp_threshold       { Biome::Swamp }
+            //else if w >= 0.0 && (h2 + t2)/2.0 + w2 <= params.forest_threshold              { Biome::Forest }
         };
 
         Tile {

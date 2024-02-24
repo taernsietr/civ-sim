@@ -38,23 +38,29 @@ struct Model {
 
 fn model(app: &App) -> Model {
     let _window = app.new_window()
-        .mouse_pressed(new_map)
+//        .mouse_pressed(new_map)
         .key_pressed(handle_keys)
         .view(view)
         .build()
         .unwrap();
     let parameters = WorldParameters {
         sea_level: 0.0,
-        peak_height: 0.95,
+        peak_height: 1.00,
         mountain_height: 0.8,
         hills_height: 0.65,
         glacier_temp: -0.8,
-        grassland_threshold: 0.5,
-        forest_threshold: 0.7,
-        swamp_threshold: 0.7,
-        tundra_low_t: -0.8,
-        tundra_high_t: -0.4,
-        global_heat_scaling: 0.7,
+        wetlands_humidity: 0.6,
+        desert_humidity: 0.0,
+        cold_desert_temp: -0.3,
+        grassland_low_t: 0.0,
+        grassland_high_t: 0.5,
+        tundra_low_t: -0.5,
+        tundra_high_t: -0.1,
+        forest_low_t: -0.1,
+        forest_high_t: 0.5,
+        cold_forest_low_t: -0.6,
+        cold_forest_high_t: -0.2,
+        global_heat_scaling: 0.9,
         altitude_scale: 500.0,
         temperature_scale: 500.0,
         humidity_scale: 500.0,
@@ -65,10 +71,7 @@ fn model(app: &App) -> Model {
     Model { _window, world, texture, parameters, visual_mode }
 }
 
-fn new_map(app: &App, model: &mut Model, _key: MouseButton) {
-    model.world = World::new(&ARGS, &model.parameters);
-    model.texture = Texture::from_image(app, &ImageRgb8(generate_image(&model.world, &model.visual_mode)));
-}
+// fn handle_click(app: &App, model: &mut Model, _key: MouseButton) { }
 
 fn handle_keys(app: &App, model: &mut Model, key: Key) {
     // SPACE: switch visualization mode
@@ -89,6 +92,12 @@ fn handle_keys(app: &App, model: &mut Model, key: Key) {
     // S: save current map
     if matches!(key, Key::S) {
         save_image(&generate_image(&model.world, &model.visual_mode), &model.world, &model.visual_mode, ARGS.debug);
+    }
+
+    // N: generate new map
+    if matches!(key, Key::N) {
+        model.world = World::new(&ARGS, &model.parameters);
+        model.texture = Texture::from_image(app, &ImageRgb8(generate_image(&model.world, &model.visual_mode)));
     }
 }
 
