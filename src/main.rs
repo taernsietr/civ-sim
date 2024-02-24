@@ -45,29 +45,28 @@ fn model(app: &App) -> Model {
         .unwrap();
     let parameters = WorldParameters {
         sea_level: 0.0,
-        peak_height: 1.00,
-        mountain_height: 0.8,
-        hills_height: 0.65,
-        glacier_temp: -0.8,
-        wetlands_humidity: 0.6,
-        desert_humidity: 0.0,
-        cold_desert_temp: -0.3,
-        grassland_low_t: 0.0,
-        grassland_high_t: 0.5,
-        tundra_low_t: -0.5,
-        tundra_high_t: -0.1,
-        forest_low_t: -0.1,
-        forest_high_t: 0.5,
-        cold_forest_low_t: -0.6,
-        cold_forest_high_t: -0.2,
+        peak_h: 0.98,
+        mountain_h: 0.8,
+        hills_h: 0.7,
+        frozen_t: -0.9,
+        tundra_t: -0.8,
+        boreal_t: -0.7,
+        boreal_r: -0.5,
+        temperate_t: -0.7,
+        temperate_r: -0.5,
+        rainforest_t: -0.5,
+        rainforest_r: 0.35,
+        wetlands_r: 0.7,
+        desert_cutoff: 0.7,
+        plains_cutoff: 0.0,
         global_heat_scaling: 0.9,
         altitude_scale: 500.0,
         temperature_scale: 500.0,
-        humidity_scale: 500.0,
+        rainfall_scale: 500.0,
     };
     let visual_mode = VisualizationMode::Biome;
     let world = World::new(&ARGS, &parameters);
-    let texture = Texture::from_image(app, &ImageRgb8(generate_image(&world, &visual_mode)));
+    let texture = Texture::from_image(app, &ImageRgb8(generate_image(&world, &parameters, &visual_mode)));
     Model { _window, world, texture, parameters, visual_mode }
 }
 
@@ -78,26 +77,26 @@ fn handle_keys(app: &App, model: &mut Model, key: Key) {
     if matches!(key, Key::Space) {
         match model.visual_mode {
             VisualizationMode::Biome => model.visual_mode = VisualizationMode::Altitude,
-            VisualizationMode::Altitude => model.visual_mode = VisualizationMode::Humidity,
-            VisualizationMode::Humidity => model.visual_mode = VisualizationMode::Temperature,
+            VisualizationMode::Altitude => model.visual_mode = VisualizationMode::Rainfall,
+            VisualizationMode::Rainfall => model.visual_mode = VisualizationMode::Temperature,
             VisualizationMode::Temperature => model.visual_mode = VisualizationMode::Debug,
             VisualizationMode::Debug => model.visual_mode = VisualizationMode::EquatorDistance,
             VisualizationMode::EquatorDistance => model.visual_mode = VisualizationMode::Biome,
             _ => unreachable!()
         };
         println!("[MapGen] Mode switched to {}.", model.visual_mode);
-        model.texture = Texture::from_image(app, &ImageRgb8(generate_image(&model.world, &model.visual_mode)));
+        model.texture = Texture::from_image(app, &ImageRgb8(generate_image(&model.world, &model.parameters, &model.visual_mode)));
     };
 
     // S: save current map
     if matches!(key, Key::S) {
-        save_image(&generate_image(&model.world, &model.visual_mode), &model.world, &model.visual_mode, ARGS.debug);
+        save_image(&generate_image(&model.world, &model.parameters, &model.visual_mode), &model.world, &model.visual_mode, ARGS.debug);
     }
 
     // N: generate new map
     if matches!(key, Key::N) {
         model.world = World::new(&ARGS, &model.parameters);
-        model.texture = Texture::from_image(app, &ImageRgb8(generate_image(&model.world, &model.visual_mode)));
+        model.texture = Texture::from_image(app, &ImageRgb8(generate_image(&model.world, &model.parameters, &model.visual_mode)));
     }
 }
 

@@ -14,25 +14,24 @@ use crate::{
 #[derive(Clone)]
 pub struct WorldParameters {
     pub sea_level: f32,
-    pub peak_height: f32,
-    pub mountain_height: f32,
-    pub hills_height: f32,
-    pub glacier_temp: f32,
-    pub wetlands_humidity: f32,
-    pub desert_humidity: f32,
-    pub cold_desert_temp: f32,
-    pub grassland_low_t: f32,
-    pub grassland_high_t: f32,
-    pub tundra_low_t: f32,
-    pub tundra_high_t: f32,
-    pub forest_low_t: f32,
-    pub forest_high_t: f32,
-    pub cold_forest_low_t: f32,
-    pub cold_forest_high_t: f32,
+    pub peak_h: f32,
+    pub mountain_h: f32,
+    pub hills_h: f32,
+    pub frozen_t: f32,
+    pub tundra_t: f32,
+    pub boreal_t: f32,
+    pub boreal_r: f32,
+    pub temperate_t: f32,
+    pub temperate_r: f32,
+    pub rainforest_t: f32,
+    pub rainforest_r: f32,
+    pub wetlands_r: f32,
+    pub desert_cutoff: f32,
+    pub plains_cutoff: f32,
     pub global_heat_scaling: f32,
     pub altitude_scale: f32,
     pub temperature_scale: f32,
-    pub humidity_scale: f32
+    pub rainfall_scale: f32
 }
 
 pub struct World {
@@ -122,6 +121,8 @@ impl World {
             });
         }
 
+        //crate::utils::helpers::generate_rivers(&tiles, &parameters, width, height);
+
         World { 
             seeds,
             width,
@@ -130,23 +131,5 @@ impl World {
             tiles,
         }
     }
-
-    fn _shape_continent(width: u32, height: u32, tiles: &mut [Tile]) {
-        println!("[MapGen] Shaping continent...");
-        let pos_0 = Vec2::new(0.0, 0.0);
-        let center = Vec2::new(
-            (width / 2) as f32,
-            (height / 2) as f32
-        );
-        let dist_0 = pos_0.distance(center);
-        for tile in tiles.iter_mut() {
-            let position = Vec2::new(tile.x, tile.y);
-            let distance_from_center = position.distance(center);
-            //tile.altitude *= distance_from_center / dist_0 * 5.0;
-            tile.altitude *= distance_from_center / dist_0;
-        };
-        println!("[MapGen] Finished processing continent.");
-    }
-
 }
 

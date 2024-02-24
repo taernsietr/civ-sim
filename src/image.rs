@@ -4,7 +4,7 @@ use nannou::image::{
     save_buffer, ColorType::Rgb8, Rgb, RgbImage
 };
 use crate::map::{
-    world::World,
+    world::{World, WorldParameters},
     tile::{Tile, Biome}
 };
 use crate::utils::helpers::scale_f32_to_u8;
@@ -16,7 +16,7 @@ pub enum VisualizationMode {
     Biome,
     Altitude,
     Temperature,
-    Humidity,
+    Rainfall,
     Vegetation,
     Hardness,
     Sunlight,
@@ -30,7 +30,7 @@ impl fmt::Display for VisualizationMode {
             VisualizationMode::Biome => write!(f, "biome"),
             VisualizationMode::Altitude => write!(f, "altitude"),
             VisualizationMode::Temperature => write!(f, "temperature"),
-            VisualizationMode::Humidity => write!(f, "humidity"),
+            VisualizationMode::Rainfall => write!(f, "rainfall"),
             VisualizationMode::Vegetation => write!(f, "vegetation"),
             VisualizationMode::Hardness => write!(f, "hardness"),
             VisualizationMode::Sunlight => write!(f, "sunlight"),
@@ -40,11 +40,17 @@ impl fmt::Display for VisualizationMode {
     }
 }
 
-pub fn generate_image(world: &World, mode: &VisualizationMode,) -> RgbImage {
+pub fn generate_image(world: &World, parameters: &WorldParameters, mode: &VisualizationMode) -> RgbImage {
     let mut img = RgbImage::new(world.width, world.height);
     for tile in &world.tiles {
         img.put_pixel(tile.x as u32, tile.y as u32, tile.rgb(mode, world));
     }
+
+    let river = crate::utils::helpers::generate_rivers(&world.tiles, parameters, world.width, world.height);
+    river.iter().for_each(|river| {
+        img.put_pixel(world.tiles[*river as usize].x as u32, world.tiles[*river as usize].y as u32, Rgb([255,0,0]));
+
+    });
     println!("[MapGen] Finished building image.");
     img
 }
@@ -68,9 +74,9 @@ pub fn save_image(
     );
 
     if debug {
-        let mut log = String::from("id,altitude,temperature,humidity\n");
+        let mut log = String::from("id,altitude,temperature,rainfall\n");
         for tile in &world.tiles {
-            log.push_str(&format!("{},{},{},{}\n", tile.id, tile.altitude, tile.temperature, tile.humidity));
+            log.push_str(&format!("{},{},{},{}\n", tile.id, tile.altitude, tile.temperature, tile.rainfall));
         }
         println!("[MapGen] Writing log to file {}.log", &file_name);
         std::fs::write(format!("/home/tsrodr/Run/civ-sim/logs/{}.log", &file_name), log).unwrap();
@@ -84,26 +90,26 @@ impl Tile {
             VisualizationMode::Debug => {
                 let color = [
                     scale_f32_to_u8(self.altitude),
-                    scale_f32_to_u8(self.humidity),
+                    scale_f32_to_u8(self.rainfall),
                     scale_f32_to_u8(self.temperature)
                 ];
                 [color[0], color[1], color[2]]
             },
             VisualizationMode::Biome => {
                 match self.biome {
-                    Biome::Coast =>      [  0,  80, 160],
-                    Biome::ColdDesert => [200, 200, 220],
-                    Biome::ColdForest => [150, 150, 100],
-                    Biome::Desert =>     [255, 210, 150],
-                    Biome::Forest =>     [  0,  50,   0],
-                    Biome::Glacier =>    [255, 255, 255],
-                    Biome::Grassland =>  [ 60, 100,   0],
-                    Biome::Hill =>       [150, 120, 100],
+                    Biome::Frozen =>     [255, 255, 255],
+                    Biome::Tundra =>     [140, 180, 160],
+                    Biome::Boreal=>      [120, 150, 130],
+                    Biome::Temperate =>  [ 20,  50,  20],
+                    Biome::Rainforest => [  0, 100,   0],
+                    Biome::Wetland =>    [ 40,  60,  20],
+                    Biome::Plains =>     [ 60,  80,  20],
+                    Biome::Desert =>     [220, 210, 150],
+                    Biome::Hill =>       [150, 150, 115],
                     Biome::Mountain =>   [150, 150, 150],
                     Biome::Peak =>       [200, 200, 200],
                     Biome::Sea =>        [  0,   0, 100],
-                    Biome::Tundra =>     [160, 180, 140],
-                    Biome::Wetland =>    [ 60,  80,  40],
+                    Biome::Coast =>      [  0,  80, 160],
                     Biome::Debug =>      [255,   0,   0]
                 }
             },
@@ -111,8 +117,8 @@ impl Tile {
                 let color = scale_f32_to_u8(self.altitude);
                 [color, color, color]
             },
-            VisualizationMode::Humidity => {
-                let color = scale_f32_to_u8(self.humidity);
+            VisualizationMode::Rainfall => {
+                let color = scale_f32_to_u8(self.rainfall);
                 [0, 0, color]
             },
             VisualizationMode::Temperature => {
@@ -122,8 +128,7 @@ impl Tile {
             VisualizationMode::EquatorDistance => {
                 let equator = world.height as f32/2.0;
                 let distance_to_equator = f32::abs(equator - self.y) / equator;
-                let color = scale_f32_to_u8(distance_to_equator);
-                if color == 0 { println!("tamo vivo"); }
+                let color = scale_f32_to_u8(-distance_to_equator);
                 [0, color, 0]
             },
             _ => unreachable!()
