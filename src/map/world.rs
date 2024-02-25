@@ -3,10 +3,11 @@ use std::sync::{
     mpsc::channel
 };
 use threadpool::ThreadPool;
-use rand::Rng;
+use rand::{Rng, seq::SliceRandom};
 use crate::{
     map::tile::Biome,
     utils::cli::Args,
+    utils::helpers::adjacent,
     map::tile::Tile
 };
 
@@ -129,5 +130,49 @@ impl World {
             tiles,
         }
     }
+
+    pub fn generate_rivers(&self,
+        params: &WorldParameters
+    ) -> Vec<usize> {
+        // find highest points
+        // select n points
+        // for every n point, find the next lowest spot L
+        // find the shared adjacencies between n and L, ignore them
+        // find the next lowest spot for L, repeat until we reach a sea tile
+        let mut rng = rand::thread_rng();
+        let points = &self.tiles.iter().filter(|x| x.altitude > params.hills_h).collect::<Vec<&Tile>>();
+        let source = points.choose(&mut rng).unwrap();
+        let i = source.id;
+        let previous = vec!(i);
+        let world_size = self.height * self.width; 
+        
+        Self::river(&self.tiles, params, self.width, world_size, &previous, &adjacent(i, self.width, world_size))
+    }
+
+    fn river(
+        tiles: &Vec<Tile>,
+        params: &WorldParameters,
+        width: usize,
+        world_size: usize,
+        previous: &[usize],
+        _adjacencies: &[usize]
+    ) -> Vec<usize> {
+        let last_tile = *previous.last().unwrap();
+        let lowest = adjacent(last_tile, width, world_size)
+            .iter()
+            .fold(last_tile, |curr, j| {
+            if tiles[*j].altitude < tiles[curr].altitude &&
+               tiles[*j].altitude > params.sea_level
+               // !adjacencies.contains(j)
+               { *j } else { curr }
+        });
+        if lowest == last_tile { previous.to_vec() }
+        else {
+            let mut current = previous.to_vec();
+            current.push(lowest);
+            Self::river(tiles, params, width, world_size, &current, &adjacent(lowest, width, world_size))
+        }
+    }
+
 }
 

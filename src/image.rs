@@ -4,7 +4,7 @@ use nannou::image::{
     save_buffer, Rgba, ColorType::Rgb8, RgbaImage
 };
 use crate::map::{
-    world::{World, WorldParameters},
+    world::World,
     tile::{Tile, Biome}
 };
 use crate::utils::helpers::scale_f64_to_u8;
@@ -40,17 +40,21 @@ impl fmt::Display for VisualizationMode {
     }
 }
 
-pub fn generate_image(world: &World, parameters: &WorldParameters, mode: &VisualizationMode) -> RgbaImage {
+pub fn generate_image(
+    world: &World,
+    rivers: &[usize],
+    mode: &VisualizationMode
+) -> RgbaImage {
     let mut img = RgbaImage::new(world.width as u32, world.height as u32);
+
     for tile in &world.tiles {
         img.put_pixel(tile.x as u32, tile.y as u32, tile.rgb(mode, world));
     }
 
-    let river = crate::utils::helpers::generate_rivers(&world.tiles, parameters, world.width, world.height);
-    river.iter().for_each(|river| {
+    rivers.iter().for_each(|river| {
         img.put_pixel(world.tiles[*river].x as u32, world.tiles[*river].y as u32, Rgba([255,0,0,255]));
-
     });
+
     println!("[MapGen] Finished building image.");
     img
 }

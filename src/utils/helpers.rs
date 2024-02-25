@@ -1,8 +1,5 @@
 use nannou::math::map_range;
 use nannou::math::num_traits::Pow;
-use rand::seq::SliceRandom;
-
-use crate::map::{tile::Tile, world::WorldParameters};
 
 /// Scales a f64 within [-1.0, 1.0] to a u8 within [0, 255]
 /// No error handling!
@@ -18,53 +15,6 @@ pub fn adjust_temperature(t: &f64, equator: &f64, y: &f64, global_scaling: &f64)
         ((1.0f64 - (2.0f64 * latitude.pow(2.0f64)) + *t) / 2.0f64) -
         (0.72f64 * *global_scaling)
     ).clamp(-1.0f64, 1.0f64)
-}
-
-pub fn generate_rivers(
-    tiles: &Vec<Tile>,
-    params: &WorldParameters,
-    width: usize,
-    height: usize
-) -> Vec<usize> {
-    // find highest points
-    // select n points
-    // for every n point, find the next lowest spot L
-    // find the shared adjacencies between n and L, ignore them
-    // find the next lowest spot for L, repeat until we reach a sea tile
-    let mut rng = rand::thread_rng();
-    let points = tiles.iter().filter(|x| x.altitude > params.hills_h).collect::<Vec<&Tile>>();
-    let source = points.choose(&mut rng).unwrap();
-    let i = source.id;
-    let previous = vec!(i);
-    let world_size = height * width; 
-    
-    let river = river(tiles, params, width, world_size, &previous, &adjacent(i, width, world_size));
-    river
-}
-
-fn river(
-    tiles: &Vec<Tile>,
-    params: &WorldParameters,
-    width: usize,
-    world_size: usize,
-    previous: &[usize],
-    _adjacencies: &[usize]
-) -> Vec<usize> {
-    let last_tile = *previous.last().unwrap();
-    let lowest = adjacent(last_tile, width, world_size)
-        .iter()
-        .fold(last_tile, |curr, j| {
-        if tiles[*j].altitude < tiles[curr].altitude &&
-           tiles[*j].altitude > params.sea_level
-           // !adjacencies.contains(j)
-           { *j } else { curr }
-    });
-    if lowest == last_tile { previous.to_vec() }
-    else {
-        let mut current = previous.to_vec();
-        current.push(lowest);
-        river(tiles, params, width, world_size, &current, &adjacent(lowest, width, world_size))
-    }
 }
 
 pub fn adjacent(i: usize, width: usize, world_size: usize) -> Vec<usize> {
