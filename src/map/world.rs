@@ -12,32 +12,32 @@ use crate::{
 
 #[derive(Clone)]
 pub struct WorldParameters {
-    pub sea_level: f32,
-    pub peak_h: f32,
-    pub mountain_h: f32,
-    pub hills_h: f32,
-    pub frozen_t: f32,
-    pub tundra_t: f32,
-    pub boreal_t: f32,
-    pub boreal_r: f32,
-    pub temperate_t: f32,
-    pub temperate_r: f32,
-    pub rainforest_t: f32,
-    pub rainforest_r: f32,
-    pub wetlands_r: f32,
-    pub desert_cutoff: f32,
-    pub plains_cutoff: f32,
-    pub global_heat_scaling: f32,
-    pub altitude_scale: f32,
-    pub temperature_scale: f32,
-    pub rainfall_scale: f32
+    pub sea_level: f64,
+    pub peak_h: f64,
+    pub mountain_h: f64,
+    pub hills_h: f64,
+    pub frozen_t: f64,
+    pub tundra_t: f64,
+    pub boreal_t: f64,
+    pub boreal_r: f64,
+    pub temperate_t: f64,
+    pub temperate_r: f64,
+    pub rainforest_t: f64,
+    pub rainforest_r: f64,
+    pub wetlands_r: f64,
+    pub desert_cutoff: f64,
+    pub plains_cutoff: f64,
+    pub global_heat_scaling: f64,
+    pub altitude_scale: f64,
+    pub temperature_scale: f64,
+    pub rainfall_scale: f64
 }
 
 pub struct World {
     pub seeds: [u32; 3],
-    pub width: u32,
-    pub height: u32,
-    pub equator: f32,
+    pub width: usize,
+    pub height: usize,
+    pub equator: f64,
     pub tiles: Vec<Tile>, 
 }
 
@@ -49,8 +49,8 @@ impl World {
         let mut rng = rand::thread_rng();
         let width = args.x;
         let height = args.y;
-        let equator = (height / 2) as f32;
-        let seeds = match &args.seeds {
+        let equator = (height / 2) as f64;
+        let seeds: [u32; 3] = match &args.seeds {
             None => [rng.gen::<u32>(), rng.gen::<u32>(), rng.gen::<u32>()],
             Some(j) if j.len() == 1 => [j[0], rng.gen::<u32>(), rng.gen::<u32>()],
             Some(j) if j.len() == 2 => [j[0], j[1], rng.gen::<u32>()],
@@ -77,8 +77,8 @@ impl World {
                 pool.execute(move || {
                     let tile = Tile::new(
                         x + width * y,
-                        x as f32,
-                        y as f32,
+                        x as f64,
+                        y as f64,
                         &equator,
                         &noise,
                         &parameters,
@@ -94,8 +94,7 @@ impl World {
 
         {
             let mut coast_tiles = Vec::<usize>::new();
-            let width = width as usize;
-            let world_size = height as usize * width; 
+            let world_size = height * width; 
             tiles.iter().enumerate().for_each(|(i, tile)| {
                 if matches!(&tile.biome, Biome::Sea) {
                     let indices = 

@@ -44,28 +44,29 @@ fn model(app: &App) -> Model {
         .build()
         .unwrap();
     let parameters = WorldParameters {
-        sea_level: 0.0,
-        peak_h: 0.98,
-        mountain_h: 0.8,
-        hills_h: 0.7,
+        sea_level: -0.1,
+        peak_h: 1.15,
+        mountain_h: 0.9,
+        hills_h: 0.8,
         frozen_t: -0.9,
-        tundra_t: -0.8,
-        boreal_t: -0.7,
+        tundra_t: -0.85,
+        boreal_t: -0.75,
         boreal_r: -0.5,
-        temperate_t: -0.7,
+        temperate_t: -0.6,
         temperate_r: -0.5,
         rainforest_t: -0.5,
         rainforest_r: 0.35,
         wetlands_r: 0.7,
-        desert_cutoff: 0.7,
+        desert_cutoff: 0.8,
         plains_cutoff: 0.0,
-        global_heat_scaling: 0.9,
-        altitude_scale: 500.0,
+        global_heat_scaling: 0.85,
+        altitude_scale: 450.0,
         temperature_scale: 500.0,
-        rainfall_scale: 500.0,
+        rainfall_scale: 600.0,
     };
     let visual_mode = VisualizationMode::Biome;
     let world = World::new(&ARGS, &parameters);
+    // let rivers = 
     let texture = Texture::from_image(app, &ImageRgba8(generate_image(&world, &parameters, &visual_mode)));
     Model { _window, world, texture, parameters, visual_mode }
 }

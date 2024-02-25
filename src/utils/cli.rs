@@ -4,10 +4,10 @@ use clap::Parser;
 #[command(author, version, about, long_about = None)]
 pub struct Args {
     #[arg(short, long, default_value_t = 800)]
-    pub x: u32,
+    pub x: usize,
 
     #[arg(short, long, default_value_t = 600)]
-    pub y: u32,
+    pub y: usize,
 
     #[arg(short, long, default_value_t = false)]
     pub debug: bool,

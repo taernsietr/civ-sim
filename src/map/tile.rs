@@ -22,29 +22,29 @@ pub enum Biome {
 
 #[derive(Debug)]
 pub struct Tile {
-    pub id: u32,
-    pub x: f32,
-    pub y: f32,
-    pub altitude: f32,
-    pub temperature: f32,
-    pub rainfall: f32,
+    pub id: usize,
+    pub x: f64,
+    pub y: f64,
+    pub altitude: f64,
+    pub temperature: f64,
+    pub rainfall: f64,
     pub biome: Biome,
 }
 
 impl Tile {
     pub fn new(
-        id: u32,
-        x: f32,
-        y: f32,
-        equator: &f32,
+        id: usize,
+        x: f64,
+        y: f64,
+        equator: &f64,
         noise: &[noise::Fbm<noise::SuperSimplex>; 3],
         params: &WorldParameters,
     ) -> Tile {
-        let h = (noise[0].get([(x / params.altitude_scale) as f64, (y / params.altitude_scale) as f64]) as f32).clamp(-1.0, 1.0);
-        let mut t = (noise[1].get([(x / params.temperature_scale) as f64, (y / params.temperature_scale) as f64]) as f32).clamp(-1.0, 1.0);
-        let r = (noise[2].get([(x / params.rainfall_scale) as f64, (y / params.rainfall_scale) as f64]) as f32).clamp(-1.0, 1.0);
+        let h: f64 = noise[0].get([x / params.altitude_scale, y / params.altitude_scale]);
+        let t: f64 = noise[1].get([x / params.temperature_scale, y / params.temperature_scale]);
+        let r: f64 = noise[2].get([x / params.rainfall_scale, y / params.rainfall_scale]);
 
-        adjust_temperature(&mut t, equator, &y, &params.global_heat_scaling);
+        let t = adjust_temperature(&t, equator, &y, &params.global_heat_scaling);
 
         let biome = {
             if      h >= params.peak_h                                   { Biome::Peak }

@@ -4,29 +4,28 @@ use rand::seq::SliceRandom;
 
 use crate::map::{tile::Tile, world::WorldParameters};
 
-/// Scales a f32 within [-1.0, 1.0] to a u8 within [0, 255]
+/// Scales a f64 within [-1.0, 1.0] to a u8 within [0, 255]
 /// No error handling!
-pub fn scale_f32_to_u8(input: f32) -> u8 {
+pub fn scale_f64_to_u8(input: f64) -> u8 {
     map_range(input, -1.0, 1.0, 0.0, 255.0) as u8
 }
 
 /// scales a temperature input in [-1.0,1.0] based on a global scaling factor
 /// global_scaling should ideally range [0,2]
-pub fn adjust_temperature(t: &mut f32, equator: &f32, y: &f32, global_scaling: &f32) {
-    let latitude = f32::abs(equator - y) / equator;
-    *t = (
-        (1.0 / (1.0 + (latitude * (-latitude * *t).exp()))) *
-        ((1.0 - (2.0 * latitude.pow(2.0)) + *t) / 2.0) -
-        (0.72 * *global_scaling)
-    ).clamp(-1.0, 1.0);
+pub fn adjust_temperature(t: &f64, equator: &f64, y: &f64, global_scaling: &f64) -> f64 {
+    let latitude = f64::abs(equator - y) / equator;
+    ((1.0f64 / (1.0f64 + (latitude * (-latitude * *t).exp()))) *
+        ((1.0f64 - (2.0f64 * latitude.pow(2.0f64)) + *t) / 2.0f64) -
+        (0.72f64 * *global_scaling)
+    ).clamp(-1.0f64, 1.0f64)
 }
 
 pub fn generate_rivers(
     tiles: &Vec<Tile>,
     params: &WorldParameters,
-    width: u32,
-    height: u32
-) -> Vec<u32> {
+    width: usize,
+    height: usize
+) -> Vec<usize> {
     // find highest points
     // select n points
     // for every n point, find the next lowest spot L
@@ -40,24 +39,23 @@ pub fn generate_rivers(
     let world_size = height * width; 
     
     let river = river(tiles, params, width, world_size, &previous, &adjacent(i, width, world_size));
-    dbg!(&river);
     river
 }
 
 fn river(
     tiles: &Vec<Tile>,
     params: &WorldParameters,
-    width: u32,
-    world_size: u32,
-    previous: &[u32],
-    _adjacencies: &[u32]
-) -> Vec<u32> {
+    width: usize,
+    world_size: usize,
+    previous: &[usize],
+    _adjacencies: &[usize]
+) -> Vec<usize> {
     let last_tile = *previous.last().unwrap();
     let lowest = adjacent(last_tile, width, world_size)
         .iter()
         .fold(last_tile, |curr, j| {
-        if tiles[*j as usize].altitude < tiles[curr as usize].altitude &&
-           tiles[*j as usize].altitude > params.sea_level
+        if tiles[*j].altitude < tiles[curr].altitude &&
+           tiles[*j].altitude > params.sea_level
            // !adjacencies.contains(j)
            { *j } else { curr }
     });
@@ -69,7 +67,7 @@ fn river(
     }
 }
 
-pub fn adjacent(i: u32, width: u32, world_size: u32) -> Vec<u32> {
+pub fn adjacent(i: usize, width: usize, world_size: usize) -> Vec<usize> {
     if i == 0                                { vec!(i+1, i+width)               } // first tile 
     else if i == width - 1                   { vec!(i-1, i+width)               } // last tile of first row
     else if i == world_size - 1              { vec!(i-1, i-width)               } // last tile

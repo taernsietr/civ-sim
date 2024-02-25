@@ -7,7 +7,7 @@ use crate::map::{
     world::{World, WorldParameters},
     tile::{Tile, Biome}
 };
-use crate::utils::helpers::scale_f32_to_u8;
+use crate::utils::helpers::scale_f64_to_u8;
 
 const DATE_FORMAT: &str = "%y%m%d-%Hh%M";
 
@@ -41,14 +41,14 @@ impl fmt::Display for VisualizationMode {
 }
 
 pub fn generate_image(world: &World, parameters: &WorldParameters, mode: &VisualizationMode) -> RgbaImage {
-    let mut img = RgbaImage::new(world.width, world.height);
+    let mut img = RgbaImage::new(world.width as u32, world.height as u32);
     for tile in &world.tiles {
         img.put_pixel(tile.x as u32, tile.y as u32, tile.rgb(mode, world));
     }
 
     let river = crate::utils::helpers::generate_rivers(&world.tiles, parameters, world.width, world.height);
     river.iter().for_each(|river| {
-        img.put_pixel(world.tiles[*river as usize].x as u32, world.tiles[*river as usize].y as u32, Rgba([255,0,0,255]));
+        img.put_pixel(world.tiles[*river].x as u32, world.tiles[*river].y as u32, Rgba([255,0,0,255]));
 
     });
     println!("[MapGen] Finished building image.");
@@ -68,8 +68,8 @@ pub fn save_image(
     _ = save_buffer(
         format!("/home/tsrodr/Run/civ-sim/images/{}.png", &file_name),
         img,
-        world.width,
-        world.height,
+        world.width as u32,
+        world.height as u32,
         Rgb8
     );
 
@@ -86,13 +86,13 @@ pub fn save_image(
 
 impl Tile {
     pub fn rgb(&self, mode: &VisualizationMode, world: &World) -> Rgba<u8> {
-        let alpha: u8 = scale_f32_to_u8(self.altitude);
+        let alpha: u8 = scale_f64_to_u8(self.altitude);
         let rgb: [u8; 3] = match mode {
             VisualizationMode::Debug => {
                 let color = [
-                    scale_f32_to_u8(self.altitude),
-                    scale_f32_to_u8(self.rainfall),
-                    scale_f32_to_u8(self.temperature)
+                    scale_f64_to_u8(self.altitude),
+                    scale_f64_to_u8(self.rainfall),
+                    scale_f64_to_u8(self.temperature)
                 ];
                 [color[0], color[1], color[2]]
             },
@@ -115,21 +115,21 @@ impl Tile {
                 }
             },
             VisualizationMode::Altitude => {
-                let color = scale_f32_to_u8(self.altitude);
+                let color = scale_f64_to_u8(self.altitude);
                 [color, color, color]
             },
             VisualizationMode::Rainfall => {
-                let color = scale_f32_to_u8(self.rainfall);
+                let color = scale_f64_to_u8(self.rainfall);
                 [0, 0, color]
             },
             VisualizationMode::Temperature => {
-                let color = scale_f32_to_u8(self.temperature);
+                let color = scale_f64_to_u8(self.temperature);
                 [color, 0, 0]
             },
             VisualizationMode::EquatorDistance => {
-                let equator = world.height as f32/2.0;
-                let distance_to_equator = f32::abs(equator - self.y) / equator;
-                let color = scale_f32_to_u8(-distance_to_equator);
+                let equator = world.height as f64/2.0;
+                let distance_to_equator = f64::abs(equator - self.y) / equator;
+                let color = scale_f64_to_u8(-distance_to_equator);
                 [0, color, 0]
             },
             _ => unreachable!()
