@@ -1,7 +1,7 @@
 use std::fmt;
 use chrono::Local;
 use nannou::image::{
-    save_buffer, ColorType::Rgb8, Rgb, RgbImage
+    save_buffer, Rgba, ColorType::Rgb8, RgbaImage
 };
 use crate::map::{
     world::{World, WorldParameters},
@@ -40,15 +40,15 @@ impl fmt::Display for VisualizationMode {
     }
 }
 
-pub fn generate_image(world: &World, parameters: &WorldParameters, mode: &VisualizationMode) -> RgbImage {
-    let mut img = RgbImage::new(world.width, world.height);
+pub fn generate_image(world: &World, parameters: &WorldParameters, mode: &VisualizationMode) -> RgbaImage {
+    let mut img = RgbaImage::new(world.width, world.height);
     for tile in &world.tiles {
         img.put_pixel(tile.x as u32, tile.y as u32, tile.rgb(mode, world));
     }
 
     let river = crate::utils::helpers::generate_rivers(&world.tiles, parameters, world.width, world.height);
     river.iter().for_each(|river| {
-        img.put_pixel(world.tiles[*river as usize].x as u32, world.tiles[*river as usize].y as u32, Rgb([255,0,0]));
+        img.put_pixel(world.tiles[*river as usize].x as u32, world.tiles[*river as usize].y as u32, Rgba([255,0,0,255]));
 
     });
     println!("[MapGen] Finished building image.");
@@ -56,7 +56,7 @@ pub fn generate_image(world: &World, parameters: &WorldParameters, mode: &Visual
 }
 
 pub fn save_image(
-    img: &RgbImage,
+    img: &RgbaImage,
     world: &World,
     mode: &VisualizationMode,
     debug: bool
@@ -85,7 +85,8 @@ pub fn save_image(
 }
 
 impl Tile {
-    pub fn rgb(&self, mode: &VisualizationMode, world: &World) -> Rgb<u8> {
+    pub fn rgb(&self, mode: &VisualizationMode, world: &World) -> Rgba<u8> {
+        let alpha: u8 = scale_f32_to_u8(self.altitude);
         let rgb: [u8; 3] = match mode {
             VisualizationMode::Debug => {
                 let color = [
@@ -134,7 +135,7 @@ impl Tile {
             _ => unreachable!()
         };
 
-        Rgb([rgb[0],rgb[1],rgb[2]])
+        Rgba([rgb[0],rgb[1],rgb[2],alpha])
     }
 }
 

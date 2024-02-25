@@ -4,7 +4,6 @@ use std::sync::{
 };
 use threadpool::ThreadPool;
 use rand::Rng;
-use nannou::glam::Vec2;
 use crate::{
     map::tile::Biome,
     utils::cli::Args,
