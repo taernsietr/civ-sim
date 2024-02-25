@@ -120,8 +120,6 @@ impl World {
             });
         }
 
-        //crate::utils::helpers::generate_rivers(&tiles, &parameters, width, height);
-
         World { 
             seeds,
             width,
@@ -140,13 +138,16 @@ impl World {
         // find the shared adjacencies between n and L, ignore them
         // find the next lowest spot for L, repeat until we reach a sea tile
         let mut rng = rand::thread_rng();
-        let points = &self.tiles.iter().filter(|x| x.altitude > params.hills_h).collect::<Vec<&Tile>>();
-        let source = points.choose(&mut rng).unwrap();
-        let i = source.id;
-        let previous = vec!(i);
         let world_size = self.height * self.width; 
+        let points = &self.tiles.iter().filter(|pt| pt.altitude > params.mountain_h).map(|pt| pt.id).collect::<Vec<usize>>();
+        let points = points.choose_multiple(&mut rng, (self.height + self.width) / 50);
+        let mut rivers: Vec<usize> = Vec::new();
         
-        Self::river(&self.tiles, params, self.width, world_size, &previous, &adjacent(i, self.width, world_size))
+        points.into_iter().for_each(|pt| {
+            let previous = vec!(*pt);
+            rivers.append(&mut Self::river(&self.tiles, params, self.width, world_size, &previous, &adjacent(*pt, self.width, world_size)));
+        });
+        rivers
     }
 
     fn river(
@@ -155,15 +156,15 @@ impl World {
         width: usize,
         world_size: usize,
         previous: &[usize],
-        _adjacencies: &[usize]
+        adjacencies: &[usize]
     ) -> Vec<usize> {
         let last_tile = *previous.last().unwrap();
         let lowest = adjacent(last_tile, width, world_size)
             .iter()
             .fold(last_tile, |curr, j| {
             if tiles[*j].altitude < tiles[curr].altitude &&
-               tiles[*j].altitude > params.sea_level
-               // !adjacencies.contains(j)
+               tiles[*j].altitude > params.sea_level &&
+               !adjacencies.contains(&last_tile)
                { *j } else { curr }
         });
         if lowest == last_tile { previous.to_vec() }

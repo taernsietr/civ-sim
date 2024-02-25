@@ -39,7 +39,6 @@ struct Model {
 
 fn model(app: &App) -> Model {
     let _window = app.new_window()
-//        .mouse_pressed(new_map)
         .key_pressed(handle_keys)
         .view(view)
         .build()
@@ -71,8 +70,6 @@ fn model(app: &App) -> Model {
     let texture = Texture::from_image(app, &ImageRgba8(generate_image(&world, &rivers, &visual_mode)));
     Model { _window, rivers, world, texture, parameters, visual_mode }
 }
-
-// fn handle_click(app: &App, model: &mut Model, _key: MouseButton) { }
 
 fn handle_keys(app: &App, model: &mut Model, key: Key) {
     // SPACE: switch visualization mode
