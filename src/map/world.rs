@@ -7,7 +7,7 @@ use rand::{Rng, seq::SliceRandom};
 use crate::{
     map::tile::Biome,
     utils::cli::Args,
-    utils::helpers::adjacent,
+    utils::helpers::{adjacent, is_map_edge},
     map::tile::Tile
 };
 
@@ -29,6 +29,7 @@ pub struct WorldParameters {
     pub desert_cutoff: f64,
     pub plains_cutoff: f64,
     pub global_heat_scaling: f64,
+    pub river_factor: f64, // cannot be 0, lower increases rivers
     pub altitude_scale: f64,
     pub temperature_scale: f64,
     pub rainfall_scale: f64
@@ -93,32 +94,25 @@ impl World {
         let mut tiles = rx.iter().collect::<Vec<Tile>>();
         tiles.sort();
 
+
         {
             let mut coast_tiles = Vec::<usize>::new();
             let world_size = height * width; 
             tiles.iter().enumerate().for_each(|(i, tile)| {
                 if matches!(&tile.biome, Biome::Sea) {
-                    let indices = 
-                        if i == 0                                { vec!(i+1, i+width)               }  // first tile 
-                        else if i == width - 1                   { vec!(i-1, i+width)               }  // last tile of first row
-                        else if i == world_size - 1              { vec!(i-1, i-width)               }  // last tile
-                        else if i == world_size - width          { vec!(i+1, i-width)               }  // first tile of last row
-                        else if i % width == 0                   { vec!(i+1, i-width, i+width)      }  // first tile of row
-                        else if i % width == width - 1           { vec!(i-1, i-width, i+width)      }  // last tile of row
-                        else if i < width                        { vec!(i-1, i+1, i+width)          }  // first row
-                        else if i > world_size - width           { vec!(i-1, i+1, i-width)          }  // last row
-                        else                                     { vec!(i-1, i+1, i-width, i+width) }; // elsewhere
-                        indices.iter().for_each(|j| {
-                            if !matches!(&tiles[*j].biome, Biome::Sea) {
-                                coast_tiles.push(*j);
-                            };
-                        });
+                    adjacent(i, width, world_size).iter().for_each(|j| {
+                        if !matches!(&tiles[*j].biome, Biome::Sea) {
+                            coast_tiles.push(*j);
+                        };
+                    });
                 };
             });
             coast_tiles.iter().for_each(|t| {
                 tiles[*t].biome = Biome::Coast;
             });
         }
+
+        _ = Self::water_prox_vectors(&tiles, width, height * width);
 
         World { 
             seeds,
@@ -139,14 +133,15 @@ impl World {
         // find the next lowest spot for L, repeat until we reach a sea tile
         let mut rng = rand::thread_rng();
         let world_size = self.height * self.width; 
-        let points = &self.tiles.iter().filter(|pt| pt.altitude > params.mountain_h).map(|pt| pt.id).collect::<Vec<usize>>();
-        let points = points.choose_multiple(&mut rng, (self.height + self.width) / 50);
+        let points = &self.tiles.iter().filter(|pt| pt.altitude >= params.mountain_h).map(|pt| pt.id).collect::<Vec<usize>>();
+        //let points = points.choose_multiple(&mut rng, (self.height + self.width) / (100.0 * params.river_factor) as usize);
+        let points = points.choose_multiple(&mut rng, 1);
         let mut rivers: Vec<usize> = Vec::new();
         
-        points.into_iter().for_each(|pt| {
-            let previous = vec!(*pt);
-            rivers.append(&mut Self::river(&self.tiles, params, self.width, world_size, &previous, &adjacent(*pt, self.width, world_size)));
-        });
+//      points.into_iter().for_each(|pt| {
+//          let previous = vec!(*pt);
+//          rivers.append(&mut Self::river(&self.tiles, params, self.width, world_size, &previous, &adjacent(*pt, self.width, world_size)));
+//      });
         rivers
     }
 
@@ -158,22 +153,57 @@ impl World {
         previous: &[usize],
         adjacencies: &[usize]
     ) -> Vec<usize> {
-        let last_tile = *previous.last().unwrap();
-        let lowest = adjacent(last_tile, width, world_size)
+        let mut rng = rand::thread_rng();
+        let tile = *previous.last().unwrap();
+        let adjacent_tiles: Vec<usize> = adjacent(tile, width, world_size);
+        let land_adjacent: Vec<&usize> = adjacent_tiles.iter().filter(|i| {
+            tiles[**i].altitude >= params.sea_level
+        }).collect();
+
+        // either the next lowest tile or the current tile if none is found
+        let lowest_adjacent: usize = land_adjacent
             .iter()
-            .fold(last_tile, |curr, j| {
-            if tiles[*j].altitude < tiles[curr].altitude &&
-               tiles[*j].altitude > params.sea_level &&
-               !adjacencies.contains(&last_tile)
-               { *j } else { curr }
+            .fold(tile, |curr, j| {
+            if tiles[**j].altitude < tiles[curr].altitude { **j }
+            else { curr }
         });
-        if lowest == last_tile { previous.to_vec() }
+
+        let mut current = previous.to_vec();
+
+        // base case: river reached coast, end path
+        if lowest_adjacent == tile && matches!(tiles[lowest_adjacent].biome, Biome::Coast) || is_map_edge(lowest_adjacent, width, world_size)
+            { current }
+
+        // case 2: continue to lowest adjacent tile
+        else if !lowest_adjacent == tile {
+            current.push(lowest_adjacent);
+            Self::river(tiles, params, width, world_size, &current, &adjacent(lowest_adjacent, width, world_size))
+        }
+
+        // case 3: no adjacent tiles are lower than previous, choose at random
         else {
-            let mut current = previous.to_vec();
-            current.push(lowest);
-            Self::river(tiles, params, width, world_size, &current, &adjacent(lowest, width, world_size))
+            let selected = adjacent_tiles.choose(&mut rng).unwrap();
+            current.push(*selected);
+            Self::river(tiles, params, width, world_size, &current, &adjacent(*selected, width, world_size))
         }
     }
 
+    fn water_prox_vectors(tiles: &[Tile], width: usize, world_size: usize) -> Vec<Vec<usize>> {
+        println!("[MapGen] Calculating water proximity vectors...");
+        let grid_side = 80; // has to be a multiple of world_size
+        let grid_n = world_size / (grid_side * grid_side);
+
+        let grids: Vec<Vec<usize>> = (0..grid_n).map(|grid| {
+            let mut indices = Vec::new();
+                for i in grid*grid_side..(grid*grid_side)+grid_side {
+                    for j in i*grid_side..(i*grid_side)+grid_side {
+                        indices.push(i+j);
+                    }
+                }
+            indices
+        }).collect();
+        println!("[MapGen] Done!");
+        grids
+    }
 }
 

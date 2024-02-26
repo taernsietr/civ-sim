@@ -60,6 +60,7 @@ fn model(app: &App) -> Model {
         desert_cutoff: 0.8,
         plains_cutoff: 0.0,
         global_heat_scaling: 0.85,
+        river_factor: 1.5,
         altitude_scale: 450.0,
         temperature_scale: 500.0,
         rainfall_scale: 600.0,
