@@ -47,7 +47,7 @@ fn model(app: &App) -> Model {
         sea_level: -0.1,
         peak_h: 1.15,
         mountain_h: 0.9,
-        hills_h: 0.8,
+        hills_h: 0.7,
         frozen_t: -0.9,
         tundra_t: -0.85,
         boreal_t: -0.75,
@@ -59,15 +59,16 @@ fn model(app: &App) -> Model {
         wetlands_r: 0.7,
         desert_cutoff: 0.8,
         plains_cutoff: 0.0,
-        global_heat_scaling: 0.85,
+        global_heat_scaling: 0.83,
         river_factor: 1.5,
-        altitude_scale: 450.0,
+        altitude_scale: 500.0,
         temperature_scale: 500.0,
-        rainfall_scale: 600.0,
+        rainfall_scale: 500.0,
     };
     let visual_mode = VisualizationMode::Biome;
     let world = World::new(&ARGS, &parameters);
-    let rivers = world.generate_rivers(&parameters);
+    //let rivers = world.generate_rivers(&parameters);
+    let rivers = vec!();
     let texture = Texture::from_image(app, &ImageRgba8(generate_image(&world, &rivers, &visual_mode)));
     Model { _window, rivers, world, texture, parameters, visual_mode }
 }
@@ -96,7 +97,7 @@ fn handle_keys(app: &App, model: &mut Model, key: Key) {
     // N: generate new map
     if matches!(key, Key::N) {
         model.world = World::new(&ARGS, &model.parameters);
-        model.rivers = model.world.generate_rivers(&model.parameters);
+        //model.rivers = model.world.generate_rivers(&model.parameters);
         model.texture = Texture::from_image(app, &ImageRgba8(generate_image(&model.world, &model.rivers, &model.visual_mode)));
     }
 }
