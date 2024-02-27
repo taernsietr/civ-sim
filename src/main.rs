@@ -2,10 +2,11 @@ use std::{path::PathBuf, str::FromStr};
 use clap::Parser;
 use nannou::prelude::*;
 use nannou::wgpu::Texture;
-use nannou::image::DynamicImage::ImageRgba8;
 use lazy_static::lazy_static;
 use crate::{
-    image::{generate_image, save_image, VisualizationMode}, map::world::{World, WorldParameters}, utils::cli::Args
+    image::{generate_image, save_image, VisualizationMode}, 
+    map::world::{World, WorldParameters},
+    utils::cli::Args
 };
 
 pub mod utils;
@@ -53,7 +54,7 @@ fn model(app: &App) -> Model {
     let world = World::new(&ARGS, &parameters);
     //let rivers = world.generate_rivers(&parameters);
     let rivers = vec!();
-    let texture = Texture::from_image(app, &ImageRgba8(generate_image(&world, &rivers, &visual_mode)));
+    let texture = Texture::from_image(app, &generate_image(&world, &rivers, &visual_mode));
     Model { _window, rivers, world, texture, parameters, visual_mode }
 }
 
@@ -69,7 +70,7 @@ fn handle_keys(app: &App, model: &mut Model, key: Key) {
             _ => unreachable!()
         };
         println!("[MapGen] Mode switched to {}.", model.visual_mode);
-        model.texture = Texture::from_image(app, &ImageRgba8(generate_image(&model.world, &model.rivers, &model.visual_mode)));
+        model.texture = Texture::from_image(app, &generate_image(&model.world, &model.rivers, &model.visual_mode));
     };
 
     // S: save current map
@@ -81,7 +82,7 @@ fn handle_keys(app: &App, model: &mut Model, key: Key) {
     if matches!(key, Key::N) {
         model.world = World::new(&ARGS, &model.parameters);
         //model.rivers = model.world.generate_rivers(&model.parameters);
-        model.texture = Texture::from_image(app, &ImageRgba8(generate_image(&model.world, &model.rivers, &model.visual_mode)));
+        model.texture = Texture::from_image(app, &generate_image(&model.world, &model.rivers, &model.visual_mode));
     }
 }
 

@@ -1,7 +1,8 @@
-use std::fmt;
+use std::{str::FromStr, path::PathBuf};
+use std::fmt::{Formatter, Result, Display};
 use chrono::Local;
 use nannou::image::{
-    save_buffer, Rgba, ColorType::Rgb8, RgbaImage
+    save_buffer, Rgba, ColorType::Rgb8, RgbaImage, DynamicImage
 };
 use crate::map::{
     world::World,
@@ -24,8 +25,8 @@ pub enum VisualizationMode {
     EquatorDistance,
 }
 
-impl fmt::Display for VisualizationMode {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl Display for VisualizationMode {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
             VisualizationMode::Biome => write!(f, "biome"),
             VisualizationMode::Altitude => write!(f, "altitude"),
@@ -44,7 +45,7 @@ pub fn generate_image(
     world: &World,
     rivers: &[usize],
     mode: &VisualizationMode
-) -> RgbaImage {
+) -> DynamicImage {
     let mut img = RgbaImage::new(world.width as u32, world.height as u32);
 
     for tile in &world.tiles {
@@ -56,22 +57,32 @@ pub fn generate_image(
     });
 
     println!("[MapGen] Finished building image.");
-    img
+    DynamicImage::ImageRgba8(img)
 }
 
 pub fn save_image(
-    img: &RgbaImage,
+    img: &DynamicImage,
     world: &World,
     mode: &VisualizationMode,
     debug: bool
 ) {
-    // TODO: refactor to PathBuf
-    let file_name = format!("{}-{}", Local::now().format(DATE_FORMAT), mode);
+    let (imagefile, logfile) = {
+        let file = PathBuf::from_str("/home/tsrodr/Run/civ-sim/").expect("[MapGen] Could not find project folder.");
+        let file_name = format!("{}-{}", Local::now().format(DATE_FORMAT), mode);
+        let mut imagefile = file.join("images/");
+        let mut logfile = file.join("logs/");
+        imagefile.set_file_name(&file_name);
+        imagefile.set_extension("png");
+        logfile.set_file_name(&file_name);
+        logfile.set_extension("log");
+
+        (imagefile, logfile)
+    };
     
-    println!("[MapGen] Writing image to file {}.png", &file_name);
+    println!("[MapGen] Writing image to file {}", &imagefile.display());
     _ = save_buffer(
-        format!("/home/tsrodr/Run/civ-sim/images/{}.png", &file_name),
-        img,
+        imagefile,
+        &img.to_rgba8(),
         world.width as u32,
         world.height as u32,
         Rgb8
@@ -82,8 +93,8 @@ pub fn save_image(
         for tile in &world.tiles {
             log.push_str(&format!("{},{},{},{}\n", tile.id, tile.altitude, tile.temperature, tile.rainfall));
         }
-        println!("[MapGen] Writing log to file {}.log", &file_name);
-        std::fs::write(format!("/home/tsrodr/Run/civ-sim/logs/{}.log", &file_name), log).unwrap();
+        println!("[MapGen] Writing log to file {}", &logfile.display());
+        std::fs::write(logfile, log).unwrap();
     }
     println!("[MapGen] Map saved!");
 }
