@@ -64,8 +64,7 @@ fn handle_keys(app: &App, model: &mut Model, key: Key) {
             VisualizationMode::Biome => model.visual_mode = VisualizationMode::Altitude,
             VisualizationMode::Altitude => model.visual_mode = VisualizationMode::Rainfall,
             VisualizationMode::Rainfall => model.visual_mode = VisualizationMode::Temperature,
-            VisualizationMode::Temperature => model.visual_mode = VisualizationMode::Debug,
-            VisualizationMode::Debug => model.visual_mode = VisualizationMode::EquatorDistance,
+            VisualizationMode::Temperature => model.visual_mode = VisualizationMode::EquatorDistance,
             VisualizationMode::EquatorDistance => model.visual_mode = VisualizationMode::Biome,
             _ => unreachable!()
         };

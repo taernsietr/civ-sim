@@ -1,5 +1,5 @@
 use nannou::math::map_range;
-use nannou::math::num_traits::Pow;
+// use nannou::math::num_traits::Pow;
 
 /// Scales a f64 within [-1.0, 1.0] to a u8 within [0, 255]
 /// No error handling!
@@ -8,13 +8,13 @@ pub fn scale_f64_to_u8(input: f64) -> u8 {
 }
 
 /// scales a temperature input in [-1.0,1.0] based on a global scaling factor
-/// global_scaling should ideally range [0,2]
-pub fn adjust_temperature(t: &f64, equator: &f64, y: &f64, global_scaling: &f64) -> f64 {
+pub fn adjust_temperature(t: &f64, equator: &f64, y: &f64, scaling: &f64) -> f64 {
     let latitude = f64::abs(equator - y) / equator;
-    ((1.0f64 / (1.0f64 + (latitude * (-latitude * *t).exp()))) *
-        ((1.0f64 - (2.0f64 * latitude.pow(2.0f64)) + *t) / 2.0f64) -
-        (0.72f64 * *global_scaling)
-    ).clamp(-1.0f64, 1.0f64)
+    (-latitude * 8.0 * scaling + t * 2.0) / 10.0
+    //((1.0f64 / (1.0f64 + (latitude * (-latitude * *t).exp()))) *
+    //    ((1.0f64 - (2.0f64 * latitude.pow(2.0f64)) + *t) / 2.0f64) -
+    //    (0.72f64 * *global_scaling)
+    //).clamp(-1.0f64, 1.0f64)
 }
 
 pub fn adjacent(i: usize, width: usize, world_size: usize) -> Vec<usize> {
