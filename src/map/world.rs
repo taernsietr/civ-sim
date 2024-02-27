@@ -4,6 +4,7 @@ use std::sync::{
 };
 use threadpool::ThreadPool;
 use rand::{Rng, seq::SliceRandom};
+use serde::{Deserialize, Serialize};
 use crate::{
     map::tile::Biome,
     utils::cli::Args,
@@ -11,7 +12,7 @@ use crate::{
     map::tile::Tile
 };
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct WorldParameters {
     pub sea_level: f64,
     pub peak_h: f64,
@@ -44,7 +45,6 @@ pub struct World {
 }
 
 impl World {
-
     pub fn new(
         args: &Args,
         parameters: &WorldParameters,

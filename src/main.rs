@@ -1,3 +1,4 @@
+use std::{path::PathBuf, str::FromStr};
 use clap::Parser;
 use nannou::prelude::*;
 use nannou::wgpu::Texture;
@@ -17,7 +18,6 @@ lazy_static! {
 }
 
 fn main() {
-
     if ARGS.debug { println!("[MapGen] Running with debug on; logs will be generated"); };
     println!(
         "[MapGen] We are attempting to generate a map in {} x {}.",
@@ -39,33 +39,16 @@ struct Model {
 }
 
 fn model(app: &App) -> Model {
+    let parameters = {
+        let file = PathBuf::from_str("/home/tsrodr/Run/civ-sim/src/parameters.json").expect("[MapGen] Failed to load json file.");
+        let data = std::fs::read_to_string(file).expect("[MapGen] Failed to load parameters.");
+        serde_json::from_str::<WorldParameters>(&data).expect("[MapGen] Failed to parse parameters.")
+    };
     let _window = app.new_window()
         .key_pressed(handle_keys)
         .view(view)
         .build()
         .unwrap();
-    let parameters = WorldParameters {
-        sea_level: -0.1,
-        peak_h: 1.15,
-        mountain_h: 0.9,
-        hills_h: 0.7,
-        frozen_t: -0.9,
-        tundra_t: -0.85,
-        boreal_t: -0.75,
-        boreal_r: -0.5,
-        temperate_t: -0.6,
-        temperate_r: -0.5,
-        rainforest_t: -0.5,
-        rainforest_r: 0.35,
-        wetlands_r: 0.7,
-        desert_cutoff: 0.8,
-        plains_cutoff: 0.0,
-        global_heat_scaling: 0.83,
-        river_factor: 1.5,
-        altitude_scale: 500.0,
-        temperature_scale: 500.0,
-        rainfall_scale: 500.0,
-    };
     let visual_mode = VisualizationMode::Biome;
     let world = World::new(&ARGS, &parameters);
     //let rivers = world.generate_rivers(&parameters);
