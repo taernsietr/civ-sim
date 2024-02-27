@@ -90,56 +90,57 @@ pub fn save_image(
 
 impl Tile {
     pub fn rgb(&self, mode: &VisualizationMode, world: &World) -> Rgba<u8> {
-        let alpha: u8 = scale_f64_to_u8(self.altitude);
-        let rgb: [u8; 3] = match mode {
+        let rgb: [u8; 4] = match mode {
             VisualizationMode::Debug => {
                 let color = [
                     scale_f64_to_u8(self.altitude),
                     scale_f64_to_u8(self.rainfall),
-                    scale_f64_to_u8(self.temperature)
+                    scale_f64_to_u8(self.temperature),
+                    255
                 ];
-                [color[0], color[1], color[2]]
+                [color[0], color[1], color[2], color[3]]
             },
             VisualizationMode::Biome => {
+                let alpha: u8 = scale_f64_to_u8(self.altitude);
                 match self.biome {
-                    Biome::Frozen =>     [255, 255, 255],
-                    Biome::Tundra =>     [140, 140, 150],
-                    Biome::Boreal=>      [130, 130, 140],
-                    Biome::Temperate =>  [105, 135,  55],
-                    Biome::Rainforest => [ 65, 130,  40],
-                    Biome::Wetland =>    [ 50,  50,  30],
-                    Biome::Plains =>     [90,  85,  40],
-                    Biome::Desert =>     [160, 135,  85],
-                    Biome::Hill =>       [130, 120, 125],
-                    Biome::Mountain =>   [140, 145, 145],
-                    Biome::Peak =>       [215, 215, 215],
-                    Biome::Coast =>      [ 15,  15, 120],
-                    Biome::Sea =>        [  0,  25, 200],
-                    Biome::Debug =>      [255,   0,   0]
+                    Biome::Frozen =>     [255, 255, 255, alpha],
+                    Biome::Tundra =>     [140, 140, 150, alpha],
+                    Biome::Boreal=>      [130, 130, 140, alpha],
+                    Biome::Temperate =>  [105, 135,  55, alpha],
+                    Biome::Rainforest => [ 65, 130,  40, alpha],
+                    Biome::Wetland =>    [ 50,  50,  30, alpha],
+                    Biome::Plains =>     [ 90,  85,  40, alpha],
+                    Biome::Desert =>     [165, 140,  85, alpha],
+                    Biome::Hill =>       [130, 120, 125, alpha],
+                    Biome::Mountain =>   [140, 145, 145, alpha],
+                    Biome::Peak =>       [215, 215, 215, alpha],
+                    Biome::Coast =>      [ 30,  75, 220, alpha],
+                    Biome::Sea =>        [ 25,  25, 200, alpha],
+                    Biome::Debug =>      [255,   0,   0, alpha]
                 }
             },
             VisualizationMode::Altitude => {
                 let color = scale_f64_to_u8(self.altitude);
-                [color, color, color]
+                [color, color, color, 255]
             },
             VisualizationMode::Rainfall => {
                 let color = scale_f64_to_u8(self.rainfall);
-                [0, 0, color]
+                [0, 0, color, 255]
             },
             VisualizationMode::Temperature => {
                 let color = scale_f64_to_u8(self.temperature);
-                [color, 0, 0]
+                [color, 0, 0, 255]
             },
             VisualizationMode::EquatorDistance => {
                 let equator = world.height as f64/2.0;
                 let distance_to_equator = f64::abs(equator - self.y) / equator;
                 let color = scale_f64_to_u8(-distance_to_equator);
-                [0, color, 0]
+                [color, color, color, 255]
             },
             _ => unreachable!()
         };
 
-        Rgba([rgb[0],rgb[1],rgb[2],alpha])
+        Rgba([rgb[0],rgb[1],rgb[2],rgb[3]])
     }
 }
 

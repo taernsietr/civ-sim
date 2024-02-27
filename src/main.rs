@@ -17,6 +17,7 @@ lazy_static! {
 }
 
 fn main() {
+
     if ARGS.debug { println!("[MapGen] Running with debug on; logs will be generated"); };
     println!(
         "[MapGen] We are attempting to generate a map in {} x {}.",
