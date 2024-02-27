@@ -1,0 +1,22 @@
+{
+    "sea_level":             -0.1,
+    "peak_h":                 1.15,
+    "mountain_h":             0.9,
+    "hills_h":                0.7,
+    "frozen_t":              -0.9,
+    "tundra_t":              -0.85,
+    "boreal_t":              -0.75,
+    "boreal_r":              -0.5,
+    "temperate_t":           -0.6,
+    "temperate_r":           -0.5,
+    "rainforest_t":          -0.5,
+    "rainforest_r":           0.35,
+    "wetlands_r":             0.7,
+    "desert_cutoff":          0.75,
+    "plains_cutoff":         -0.15,
+    "global_heat_scaling":    1.33,
+    "river_factor":           1.5,
+    "altitude_scale":       500.0,
+    "temperature_scale":    500.0,
+    "rainfall_scale":       500.0
+}

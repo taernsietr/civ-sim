@@ -29,13 +29,3 @@ pub fn adjacent(i: usize, width: usize, world_size: usize) -> Vec<usize> {
     else                                     { vec!(i-1, i+1, i-width, i+width) } // elsewhere
 }
 
-pub fn is_map_edge(i: usize, width: usize, world_size: usize) -> bool {
-    i == 0                      
-    || i == width - 1         
-    || i == world_size - 1    
-    || i == world_size - width
-    || i % width == 0         
-    || i % width == width - 1 
-    || i < width              
-    || i > world_size - width 
-}

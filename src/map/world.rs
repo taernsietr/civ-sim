@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     map::tile::Biome,
     utils::cli::Args,
-    utils::helpers::{adjacent, is_map_edge},
+    utils::helpers::adjacent,
     map::tile::Tile
 };
 
@@ -169,7 +169,7 @@ impl World {
         let mut current = previous.to_vec();
 
         // base case: river reached coast, end path
-        if lowest_adjacent == tile && matches!(tiles[lowest_adjacent].biome, Biome::Coast) || is_map_edge(lowest_adjacent, width, world_size)
+        if lowest_adjacent == tile && matches!(tiles[lowest_adjacent].biome, Biome::Coast)
             { current }
 
         // case 2: continue to lowest adjacent tile
