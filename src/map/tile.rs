@@ -1,6 +1,8 @@
 use noise::NoiseFn;
-use crate::utils::helpers::adjust_temperature;
-use super::world::WorldParameters;
+use crate::{
+    utils::helpers::adjust_temperature,
+    map::world::WorldParameters
+};
 
 #[derive(Debug, Clone)]
 pub enum Biome {
@@ -37,14 +39,16 @@ impl Tile {
         x: f64,
         y: f64,
         equator: &f64,
-        noise: &[noise::Fbm<noise::SuperSimplex>; 3],
+        noise: &[noise::Fbm<noise::SuperSimplex>; 4],
         params: &WorldParameters,
     ) -> Tile {
-        let h: f64 = noise[0].get([x / params.altitude_scale, y / params.altitude_scale]);
-        let t: f64 = noise[1].get([x / params.temperature_scale, y / params.temperature_scale]);
-        let r: f64 = noise[2].get([x / params.rainfall_scale, y / params.rainfall_scale]);
+        let h1: f64 = noise[0].get([x / params.altitude_scale, y / params.altitude_scale]);
+        let h2: f64 = noise[1].get([x / (params.altitude_scale * 2.0), y / (params.altitude_scale * 2.0)]);
+        let t: f64 = noise[2].get([x / params.temperature_scale, y / params.temperature_scale]);
+        let r: f64 = noise[3].get([x / params.rainfall_scale, y / params.rainfall_scale]);
 
         let t = adjust_temperature(&t, equator, &y, &params.global_heat_scaling);
+        let h = (h1+h2*2.0)/3.0;
 
         let biome = {
             if      h >= params.peak_h                                   { Biome::Peak }

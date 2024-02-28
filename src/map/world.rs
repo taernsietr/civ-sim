@@ -36,7 +36,7 @@ pub struct WorldParameters {
 pub struct WorldBuilder<'a> {
     pub args: &'a Args,
     pub params: &'a WorldParameters,
-    pub seeds: [u32; 3],
+    pub seeds: [u32; 4],
     pub width: usize,
     pub height: usize,
     pub size: usize,
@@ -46,7 +46,7 @@ pub struct WorldBuilder<'a> {
 }
 
 pub struct World {
-    pub seeds: [u32; 3],
+    pub seeds: [u32; 4],
     pub width: usize,
     pub height: usize,
     pub size: usize,
@@ -72,9 +72,14 @@ impl<'a> From<&mut WorldBuilder<'a>> for World {
 impl<'a> WorldBuilder<'a> {
     pub fn new(args: &'a Args, params: &'a WorldParameters) -> WorldBuilder<'a> {
         let mut rng = rand::thread_rng();
-        let seeds: [u32; 3] = match &args.seeds {
-            None => [rng.gen::<u32>(), rng.gen::<u32>(), rng.gen::<u32>()],
-            Some(j) => [j[0], j[1], j[2]],
+        let seeds: [u32; 4] = match &args.seeds {
+            None => [
+                rng.gen::<u32>(),
+                rng.gen::<u32>(),
+                rng.gen::<u32>(),
+                rng.gen::<u32>()
+            ],
+            Some(j) => [j[0], j[1], j[2], j[3]],
         };
 
         WorldBuilder { 
@@ -91,7 +96,12 @@ impl<'a> WorldBuilder<'a> {
     }
 
     pub fn build(&mut self) -> World {
-        println!("[MapGen] Building world using seeds [{}, {}, {}]", self.seeds[0], self.seeds[1], self.seeds[2]);
+        println!("[MapGen] Building world using seeds [{}, {}, {}, {}]",
+            self.seeds[0],
+            self.seeds[1],
+            self.seeds[2],
+            self.seeds[3]
+        );
         self.generate_tiles()
             .generate_coast()
             //.generate_rivers()
@@ -103,7 +113,8 @@ impl<'a> WorldBuilder<'a> {
         let noise = [
             noise::Fbm::<noise::SuperSimplex>::new(self.seeds[0]),
             noise::Fbm::<noise::SuperSimplex>::new(self.seeds[1]),
-            noise::Fbm::<noise::SuperSimplex>::new(self.seeds[2])
+            noise::Fbm::<noise::SuperSimplex>::new(self.seeds[2]),
+            noise::Fbm::<noise::SuperSimplex>::new(self.seeds[3])
         ];
 
         let noise = Arc::new(noise);

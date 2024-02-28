@@ -134,7 +134,8 @@ impl Tile {
             },
             VisualizationMode::Altitude => {
                 let color = scale_f64_to_u8(self.altitude);
-                [color, color, color, 255]
+                if self.altitude < 0.0  { [0, 0, color, 255] }
+                else { [color, color, color, 255] }
             },
             VisualizationMode::Rainfall => {
                 let color = scale_f64_to_u8(self.rainfall);

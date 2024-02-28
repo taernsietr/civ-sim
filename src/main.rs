@@ -1,7 +1,9 @@
 use clap::Parser;
-use nannou::prelude::*;
-use nannou::wgpu::Texture;
 use lazy_static::lazy_static;
+use nannou::{
+    prelude::*,
+    wgpu::Texture
+};
 use crate::{
     image::VisualizationMode, 
     map::world::{WorldBuilder, World, WorldParameters},
@@ -32,9 +34,7 @@ fn main() {
         ARGS.x,
         ARGS.y
     );
-    nannou::app(model)
-        .loop_mode(LoopMode::Wait)
-        .run();
+    nannou::app(model).loop_mode(LoopMode::Wait).run();
 }
 
 fn model(app: &App) -> Model {
