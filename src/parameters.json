@@ -15,7 +15,6 @@
     "desert_cutoff":          0.75,
     "plains_cutoff":         -0.15,
     "global_heat_scaling":    1.33,
-    "river_factor":           1.5,
     "altitude_scale":       500.0,
     "temperature_scale":    500.0,
     "rainfall_scale":       500.0

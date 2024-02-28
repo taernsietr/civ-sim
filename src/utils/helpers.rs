@@ -1,5 +1,6 @@
+use std::{path::PathBuf, str::FromStr};
 use nannou::math::map_range;
-// use nannou::math::num_traits::Pow;
+use crate::WorldParameters;
 
 /// Scales a f64 within [-1.0, 1.0] to a u8 within [0, 255]
 /// No error handling!
@@ -29,3 +30,11 @@ pub fn adjacent(i: usize, width: usize, world_size: usize) -> Vec<usize> {
     else                                     { vec!(i-1, i+1, i-width, i+width) } // elsewhere
 }
 
+pub fn load_parameters() -> WorldParameters {
+    let file = PathBuf::from_str("/home/tsrodr/Run/civ-sim/src/parameters.json")
+        .expect("[MapGen] Failed to load json file.");
+    let data = std::fs::read_to_string(file)
+        .expect("[MapGen] Failed to load parameters.");
+    serde_json::from_str::<WorldParameters>(&data)
+        .expect("[MapGen] Failed to parse parameters.")
+}

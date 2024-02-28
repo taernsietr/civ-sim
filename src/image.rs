@@ -1,14 +1,19 @@
-use std::{str::FromStr, path::PathBuf};
-use std::fmt::{Formatter, Result, Display};
+use std::{
+    str::FromStr,
+    path::PathBuf,
+    fmt::{Formatter, Result, Display}
+};
 use chrono::Local;
 use nannou::image::{
     save_buffer, Rgba, ColorType::Rgb8, RgbaImage, DynamicImage
 };
-use crate::map::{
-    world::World,
-    tile::{Tile, Biome}
+use crate::{
+    map::{
+        world::World,
+        tile::{Tile, Biome}
+    },
+    utils::helpers::scale_f64_to_u8
 };
-use crate::utils::helpers::scale_f64_to_u8;
 
 const DATE_FORMAT: &str = "%y%m%d-%Hh%M";
 
@@ -41,62 +46,59 @@ impl Display for VisualizationMode {
     }
 }
 
-pub fn generate_image(
-    world: &World,
-    rivers: &[usize],
-    mode: &VisualizationMode
-) -> DynamicImage {
-    let mut img = RgbaImage::new(world.width as u32, world.height as u32);
+impl World {
+    pub fn generate_image(&self, mode: &VisualizationMode) -> DynamicImage {
+        let mut img = RgbaImage::new(self.width as u32, self.height as u32);
 
-    for tile in &world.tiles {
-        img.put_pixel(tile.x as u32, tile.y as u32, tile.rgb(mode, world));
-    }
-
-    rivers.iter().for_each(|river| {
-        img.put_pixel(world.tiles[*river].x as u32, world.tiles[*river].y as u32, Rgba([255,0,0,255]));
-    });
-
-    println!("[MapGen] Finished building image.");
-    DynamicImage::ImageRgba8(img)
-}
-
-pub fn save_image(
-    img: &DynamicImage,
-    world: &World,
-    mode: &VisualizationMode,
-    debug: bool
-) {
-    let (imagefile, logfile) = {
-        let file = PathBuf::from_str("/home/tsrodr/Run/civ-sim/").expect("[MapGen] Could not find project folder.");
-        let file_name = format!("{}-{}", Local::now().format(DATE_FORMAT), mode);
-        let mut imagefile = file.join("images/");
-        let mut logfile = file.join("logs/");
-        imagefile.set_file_name(&file_name);
-        imagefile.set_extension("png");
-        logfile.set_file_name(&file_name);
-        logfile.set_extension("log");
-
-        (imagefile, logfile)
-    };
-    
-    println!("[MapGen] Writing image to file {}", &imagefile.display());
-    _ = save_buffer(
-        imagefile,
-        &img.to_rgba8(),
-        world.width as u32,
-        world.height as u32,
-        Rgb8
-    );
-
-    if debug {
-        let mut log = String::from("id,altitude,temperature,rainfall\n");
-        for tile in &world.tiles {
-            log.push_str(&format!("{},{},{},{}\n", tile.id, tile.altitude, tile.temperature, tile.rainfall));
+        for tile in &self.tiles {
+            img.put_pixel(tile.x as u32, tile.y as u32, tile.rgb(mode, self));
         }
-        println!("[MapGen] Writing log to file {}", &logfile.display());
-        std::fs::write(logfile, log).unwrap();
+
+        self.rivers.iter().for_each(|river| {
+            img.put_pixel(self.tiles[*river].x as u32, self.tiles[*river].y as u32, Rgba([255,0,0,255]));
+        });
+
+        println!("[MapGen] Finished building image.");
+        DynamicImage::ImageRgba8(img)
     }
-    println!("[MapGen] Map saved!");
+
+    pub fn save_image(
+        &self,
+        mode: &VisualizationMode,
+        debug: bool
+    ) {
+        let (imagefile, logfile) = {
+            let file = PathBuf::from_str("/home/tsrodr/Run/civ-sim/").expect("[MapGen] Could not find project folder.");
+            let file_name = format!("{}-{}", Local::now().format(DATE_FORMAT), mode);
+            let mut imagefile = file.join("images/");
+            let mut logfile = file.join("logs/");
+            imagefile.set_file_name(&file_name);
+            imagefile.set_extension("png");
+            logfile.set_file_name(&file_name);
+            logfile.set_extension("log");
+
+            (imagefile, logfile)
+        };
+        
+        println!("[MapGen] Writing image to file {}", &imagefile.display());
+        _ = save_buffer(
+            imagefile,
+            &self.generate_image(mode).to_rgba8(),
+            self.width as u32,
+            self.height as u32,
+            Rgb8
+        );
+
+        if debug {
+            let mut log = String::from("id,altitude,temperature,rainfall\n");
+            for tile in &self.tiles {
+                log.push_str(&format!("{},{},{},{}\n", tile.id, tile.altitude, tile.temperature, tile.rainfall));
+            }
+            println!("[MapGen] Writing log to file {}", &logfile.display());
+            std::fs::write(logfile, log).unwrap();
+        }
+        println!("[MapGen] Map saved!");
+    }
 }
 
 impl Tile {

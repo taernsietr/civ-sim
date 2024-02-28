@@ -2,7 +2,7 @@ use noise::NoiseFn;
 use crate::utils::helpers::adjust_temperature;
 use super::world::WorldParameters;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Biome {
     Boreal,
     Coast,
@@ -20,7 +20,7 @@ pub enum Biome {
     Debug,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Tile {
     pub id: usize,
     pub x: f64,
