@@ -43,7 +43,7 @@ impl Tile {
         params: &WorldParameters,
     ) -> Tile {
         let h1: f64 = noise[0].get([x / params.altitude_scale, y / params.altitude_scale]);
-        let h2: f64 = noise[1].get([x / (params.altitude_scale * 2.0), y / (params.altitude_scale * 2.0)]);
+        let h2: f64 = noise[1].get([x / (params.altitude_scale / 2.0), y / (params.altitude_scale / 2.0)]);
         let t: f64 = noise[2].get([x / params.temperature_scale, y / params.temperature_scale]);
         let r: f64 = noise[3].get([x / params.rainfall_scale, y / params.rainfall_scale]);
 
@@ -76,6 +76,8 @@ impl Tile {
             biome
         }
     }
+
+    pub fn is_sea(&self) -> bool { matches!(self.biome, Biome::Sea) }
 }
 
 impl PartialEq for Tile {

@@ -30,6 +30,16 @@ pub fn adjacent(i: usize, width: usize, world_size: usize) -> Vec<usize> {
     else                                     { vec!(i-1, i+1, i-width, i+width) } // elsewhere
 }
 
+pub fn xy_to_index(tile: &crate::map::tile::Tile, width: usize) -> usize {
+    (tile.x as usize) + ((tile.y as usize) * width)
+}
+
+pub fn index_to_xy(index: usize, width: usize) -> (f32, f32) {
+    let y = (index as f32 / width as f32).floor();
+    let x = (index % width) as f32;
+    (x, y)
+}
+
 pub fn load_parameters() -> WorldParameters {
     let file = PathBuf::from_str("/home/tsrodr/Run/civ-sim/src/parameters.json")
         .expect("[MapGen] Failed to load json file.");

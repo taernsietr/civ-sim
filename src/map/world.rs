@@ -156,15 +156,15 @@ impl<'a> WorldBuilder<'a> {
     fn generate_coast(&mut self) -> &mut Self {
         println!("[MapGen] Finding coast tiles.");
         let mut coast_tiles = Vec::<usize>::new();
-        self.tiles.iter().enumerate().for_each(|(i, tile)| {
-            if matches!(&tile.biome, Biome::Sea) {
-                adjacent(i, self.width, self.size).iter().for_each(|j| {
-                    if !matches!(&self.tiles[*j].biome, Biome::Sea) {
-                        coast_tiles.push(*j);
-                    };
-                });
-            };
+
+        self.tiles.iter().filter(|tile| tile.is_sea()).for_each(|tile| {
+            adjacent(tile.id, self.width, self.size).iter().for_each(|neighbor| {
+                if !&self.tiles[*neighbor].is_sea() {
+                    coast_tiles.push(*neighbor);
+                };
+            });
         });
+        
         coast_tiles.iter().for_each(|t| {
             self.tiles[*t].biome = Biome::Coast;
         });
