@@ -9,7 +9,7 @@ pub fn scale_f64_to_u8(input: f64) -> u8 {
 }
 
 /// scales a temperature input in [-1.0,1.0] based on a global scaling factor
-pub fn adjust_temperature(t: &f64, equator: &f64, y: &f64, scaling: &f64) -> f64 {
+pub fn adjust_temperature(t: f64, equator: &f64, y: &f64, scaling: &f64) -> f64 {
     let latitude = f64::abs(equator - y) / equator;
     (-latitude * 8.0 * scaling + t * 2.0) / 10.0
     //((1.0f64 / (1.0f64 + (latitude * (-latitude * *t).exp()))) *

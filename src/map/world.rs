@@ -172,6 +172,7 @@ impl<'a> WorldBuilder<'a> {
         self
     }
 
+    #[allow(dead_code)]
     fn generate_rivers(&mut self) -> &mut Self {
         todo!();
         // find highest points
@@ -179,6 +180,19 @@ impl<'a> WorldBuilder<'a> {
         // for every n point, find the next lowest spot L
         // find the shared adjacencies between n and L, ignore them
         // find the next lowest spot for L, repeat until we reach a sea tile
+        //let mut rng = rand::thread_rng();
+        //let source: &Tile = self.tiles.iter()
+        //    .filter(|tile| tile.altitude > self.params.hills_h)
+        //    .collect::<Vec<&Tile>>()
+        //    .choose(&mut rng)
+        //    .unwrap();
+        //let river = {
+        //    adjacent(source.id, self.width, self.size).iter().fold(source.id, |high, curr| {
+        //        if self.tiles[*curr].altitude > self.tiles[high].altitude { *curr }
+        //        else { high }
+        //    });
+        //};
+        //self
     }
 }
 
