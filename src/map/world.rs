@@ -4,7 +4,7 @@ use std::sync::{
 };
 use serde::Deserialize;
 use threadpool::ThreadPool;
-use rand::{Rng, seq::SliceRandom};
+use rand::Rng;
 use crate::{
     map::tile::{Tile, Biome},
     utils::{cli::Args, helpers::adjacent},

@@ -68,13 +68,16 @@ impl World {
         debug: bool
     ) {
         let (imagefile, logfile) = {
-            let file = PathBuf::from_str("/home/tsrodr/Run/civ-sim/").expect("[MapGen] Could not find project folder.");
+            let mut imagefile = PathBuf::from_str("/home/tsrodr/Run/civ-sim/").expect("[MapGen] Could not find project folder.");
+            let mut logfile = imagefile.clone();
             let file_name = format!("{}-{}", Local::now().format(DATE_FORMAT), mode);
-            let mut imagefile = file.join("images/");
-            let mut logfile = file.join("logs/");
-            imagefile.set_file_name(&file_name);
+
+            imagefile.push("images");
+            imagefile.push(&file_name);
             imagefile.set_extension("png");
-            logfile.set_file_name(&file_name);
+
+            logfile.push("logs");
+            logfile.push(&file_name);
             logfile.set_extension("log");
 
             (imagefile, logfile)
@@ -83,7 +86,7 @@ impl World {
         println!("[MapGen] Writing image to file {}", &imagefile.display());
         _ = save_buffer(
             imagefile,
-            &self.generate_image(mode).to_rgba8(),
+            self.generate_image(mode).as_rgba8().unwrap(),
             self.width as u32,
             self.height as u32,
             Rgb8
@@ -117,14 +120,14 @@ impl Tile {
                 let alpha: u8 = scale_f64_to_u8(self.altitude);
                 match self.biome {
                     Biome::Frozen =>     [255, 255, 255, alpha],
-                    Biome::Tundra =>     [140, 140, 150, alpha],
-                    Biome::Boreal=>      [130, 130, 140, alpha],
+                    Biome::Tundra =>     [150, 130, 140, alpha],
+                    Biome::Boreal=>      [145, 145, 135, alpha],
                     Biome::Temperate =>  [105, 135,  55, alpha],
-                    Biome::Rainforest => [ 65, 130,  40, alpha],
-                    Biome::Wetland =>    [ 50,  50,  30, alpha],
-                    Biome::Plains =>     [ 90,  85,  40, alpha],
-                    Biome::Desert =>     [165, 140,  85, alpha],
-                    Biome::Hill =>       [130, 120, 125, alpha],
+                    Biome::Rainforest => [ 55, 120,  35, alpha],
+                    Biome::Wetland =>    [ 55,  55,  35, alpha],
+                    Biome::Plains =>     [ 90,  90,  40, alpha],
+                    Biome::Desert =>     [170, 145,  90, alpha],
+                    Biome::Hill =>       [125, 130, 120, alpha],
                     Biome::Mountain =>   [140, 145, 145, alpha],
                     Biome::Peak =>       [215, 215, 215, alpha],
                     Biome::Coast =>      [ 30,  75, 220, alpha],

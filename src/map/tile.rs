@@ -54,8 +54,8 @@ impl Tile {
             let a = noise[0].get([w, z]);
             let b = noise[0].get([w + 0.003, z + 0.002]);
             let c = noise[0].get([w + 1.2 * a, z + 1.2 * b]) +
-            noise[1].get([x, y]) +
-            noise[1].get([w, z]);
+            noise[0].get([x, y]) +
+            noise[0].get([w, z]);
             c / 3.0
         };
 
