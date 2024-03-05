@@ -19,8 +19,7 @@ advanced image processing techniques. I did begin using
 an image to screen, whereas before I saved each generated image instead of
 displaying it.
 
-[!'Example map in
-1920x1080'](https://github.com/taernsietr/civ-sim/blob/master/examples/example-1.png)
+!['Example map in 1920x1080'](https://github.com/taernsietr/civ-sim/blob/master/examples/example-1.png)
 
 Currently I plan on converting the code to run via WebGPU, in order to
 facilitate faster iterations, then adding other features such as rivers. This
