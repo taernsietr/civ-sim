@@ -1,8 +1,5 @@
 use noise::NoiseFn;
-use crate::{
-    utils::helpers::adjust_temperature,
-    map::world::WorldParameters
-};
+use crate::map::world::WorldParameters;
 
 #[derive(Debug, Clone)]
 pub enum Biome {
@@ -42,15 +39,10 @@ impl Tile {
         noise: &[noise::Fbm<noise::SuperSimplex>; 4],
         params: &WorldParameters,
     ) -> Tile {
-        let rainfall: f64 = noise[3].get([x / params.rainfall_scale, y / params.rainfall_scale]);
-
         let temperature: f64 = {
-            adjust_temperature(
-                noise[2].get([x / params.temperature_scale, y / params.temperature_scale]),
-                equator,
-                &y,
-                &params.global_heat_scaling
-            )
+            ((-(f64::abs(equator - y) / equator) * 8.0) * params.global_heat_scaling +
+            noise[0].get([x / params.temperature_scale, y / params.temperature_scale]) * 2.0)
+            / 10.0
         };
 
         let altitude: f64 = {
@@ -59,27 +51,30 @@ impl Tile {
             let x = x / (params.altitude_scale * 0.5);
             let y = y / (params.altitude_scale * 0.5);
 
-            let a = noise[0].get([w, z]);
-            let b = noise[0].get([w + 0.003, z + 0.002]);
-            let c = noise[0].get([w + 1.2 * a, z + 1.2 * b]) +
-            noise[0].get([x, y]) +
-            noise[1].get([w, z]);
-            c / 3.0
+            let a = noise[1].get([w, z]);
+            let b = noise[1].get([w + 0.003, z + 0.002]);
+            let c = noise[1].get([w + 1.2 * a, z + 1.2 * b]) + noise[1].get([x, y]);
+            c / 2.0
+        };
+
+        let rainfall: f64 = {
+            let a: f64 = noise[2].get([x / params.rainfall_scale, y / params.rainfall_scale]);
+            a.min((-altitude + a)/2.0)
         };
 
         let biome = {
-            if      altitude >= params.peak_h                                             { Biome::Peak }
-            else if altitude >= params.mountain_h                                         { Biome::Mountain }
-            else if altitude >= params.hills_h                                            { Biome::Hill }
-            else if altitude <= params.sea_level                                          { Biome::Sea }
+            if      altitude    >= params.peak_h                                          { Biome::Peak }
+            else if altitude    >= params.mountain_h                                      { Biome::Mountain }
+            else if altitude    >= params.hills_h                                         { Biome::Hill }
+            else if altitude    <= params.sea_level                                       { Biome::Sea }
             else if temperature <= params.frozen_t                                        { Biome::Frozen }
             else if temperature <= params.tundra_t                                        { Biome::Tundra }
             else if temperature <= params.boreal_t && rainfall >= params.boreal_r         { Biome::Boreal }
-            else if rainfall >= params.wetlands_r                                         { Biome::Wetland }
+            else if rainfall    >= params.wetlands_r                                      { Biome::Wetland }
             else if temperature >= params.rainforest_t && rainfall >= params.rainforest_r { Biome::Rainforest }
             else if temperature <= params.temperate_t && rainfall >= params.temperate_r   { Biome::Temperate }
+            else if rainfall    <= params.desert_r                                        { Biome::Desert }
             else if temperature + rainfall <= params.plains_cutoff                        { Biome::Plains }
-            else if temperature + rainfall <= params.desert_cutoff                        { Biome::Desert }
             else                                                                          { Biome::Debug }
         };
 

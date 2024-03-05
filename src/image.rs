@@ -5,7 +5,7 @@ use std::{
 };
 use chrono::Local;
 use nannou::image::{
-    save_buffer, Rgb, Rgba, ColorType::{Rgb8, Rgba8}, RgbaImage, DynamicImage
+    save_buffer, Rgba, ColorType::Rgba8, RgbaImage, DynamicImage
 };
 use crate::{
     map::{
@@ -21,6 +21,7 @@ const DATE_FORMAT: &str = "%y%m%d-%Hh%M";
 pub enum VisualizationMode {
     Biome,
     Altitude,
+    AltitudeWithSea,
     Temperature,
     Rainfall,
     Vegetation,
@@ -35,6 +36,7 @@ impl Display for VisualizationMode {
         match self {
             VisualizationMode::Biome => write!(f, "biome"),
             VisualizationMode::Altitude => write!(f, "altitude"),
+            VisualizationMode::AltitudeWithSea => write!(f, "altitude (with sea)"),
             VisualizationMode::Temperature => write!(f, "temperature"),
             VisualizationMode::Rainfall => write!(f, "rainfall"),
             VisualizationMode::Vegetation => write!(f, "vegetation"),
@@ -122,15 +124,15 @@ impl Tile {
                 let alpha: u8 = scale_f64_to_u8(self.altitude);
                 match self.biome {
                     Biome::Frozen =>     [255, 255, 255, alpha],
-                    Biome::Tundra =>     [150, 130, 140, alpha],
-                    Biome::Boreal=>      [145, 145, 135, alpha],
-                    Biome::Temperate =>  [105, 135,  55, alpha],
-                    Biome::Rainforest => [ 55, 120,  35, alpha],
-                    Biome::Wetland =>    [ 55,  55,  35, alpha],
-                    Biome::Plains =>     [ 90,  90,  40, alpha],
-                    Biome::Desert =>     [170, 145,  90, alpha],
-                    Biome::Hill =>       [125, 130, 120, alpha],
-                    Biome::Mountain =>   [140, 145, 145, alpha],
+                    Biome::Tundra =>     [150, 140, 130, alpha],
+                    Biome::Boreal=>      [150, 150, 130, alpha],
+                    Biome::Temperate =>  [ 35,  80,  35, alpha],
+                    Biome::Rainforest => [ 90, 120,  35, alpha],
+                    Biome::Wetland =>    [ 55,  80,  75, alpha],
+                    Biome::Plains =>     [200, 200, 155, alpha],
+                    Biome::Desert =>     [255, 235, 185, alpha],
+                    Biome::Hill =>       [105, 110, 100, alpha],
+                    Biome::Mountain =>   [125, 130, 130, alpha],
                     Biome::Peak =>       [215, 215, 215, alpha],
                     Biome::Coast =>      [ 30,  75, 220, alpha],
                     Biome::Sea =>        [ 25,  25, 200, alpha],
@@ -139,8 +141,12 @@ impl Tile {
             },
             VisualizationMode::Altitude => {
                 let color = scale_f64_to_u8(self.altitude);
+                [color, color, color, 255]
+            },
+            VisualizationMode::AltitudeWithSea => {
+                let color = scale_f64_to_u8(self.altitude);
                 if self.altitude < 0.0  { [0, 0, color, 255] }
-                else { [color, color, color, 255] }
+                else { [color/2, color/2, 0, 255] }
             },
             VisualizationMode::Rainfall => {
                 let color = scale_f64_to_u8(self.rainfall);

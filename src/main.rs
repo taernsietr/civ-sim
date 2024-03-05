@@ -63,10 +63,10 @@ fn handle_keys(app: &App, model: &mut Model, key: Key) {
     if matches!(key, Key::Space) {
         match model.visual_mode {
             VisualizationMode::Biome => model.visual_mode = VisualizationMode::Altitude,
-            VisualizationMode::Altitude => model.visual_mode = VisualizationMode::Rainfall,
+            VisualizationMode::Altitude => model.visual_mode = VisualizationMode::AltitudeWithSea,
+            VisualizationMode::AltitudeWithSea => model.visual_mode = VisualizationMode::Rainfall,
             VisualizationMode::Rainfall => model.visual_mode = VisualizationMode::Temperature,
-            VisualizationMode::Temperature => model.visual_mode = VisualizationMode::EquatorDistance,
-            VisualizationMode::EquatorDistance => model.visual_mode = VisualizationMode::Biome,
+            VisualizationMode::Temperature => model.visual_mode = VisualizationMode::Biome,
             _ => unreachable!()
         };
         println!("[MapGen] Mode switched to {}.", model.visual_mode);
