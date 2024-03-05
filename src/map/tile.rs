@@ -59,7 +59,9 @@ impl Tile {
 
         let rainfall: f64 = {
             let a: f64 = noise[2].get([x / params.rainfall_scale, y / params.rainfall_scale]);
-            a.min((-altitude + a)/2.0)
+            let b: f64 = -(7.0 * (f64::abs(equator - y) / equator)).cos();
+            let c: f64 = f64::abs(temperature);
+            (a + b + c) / 3.0
         };
 
         let biome = {

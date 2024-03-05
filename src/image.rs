@@ -129,7 +129,7 @@ impl Tile {
                     Biome::Temperate =>  [ 35,  80,  35, alpha],
                     Biome::Rainforest => [ 90, 120,  35, alpha],
                     Biome::Wetland =>    [ 55,  80,  75, alpha],
-                    Biome::Plains =>     [200, 200, 155, alpha],
+                    Biome::Plains =>     [180, 180, 135, alpha],
                     Biome::Desert =>     [255, 235, 185, alpha],
                     Biome::Hill =>       [105, 110, 100, alpha],
                     Biome::Mountain =>   [125, 130, 130, alpha],
