@@ -42,46 +42,54 @@ impl Tile {
         noise: &[noise::Fbm<noise::SuperSimplex>; 4],
         params: &WorldParameters,
     ) -> Tile {
-        let t: f64 = noise[2].get([x / params.temperature_scale, y / params.temperature_scale]);
-        let r: f64 = noise[3].get([x / params.rainfall_scale, y / params.rainfall_scale]);
-        let t = adjust_temperature(t, equator, &y, &params.global_heat_scaling);
+        let rainfall: f64 = noise[3].get([x / params.rainfall_scale, y / params.rainfall_scale]);
 
-        let h: f64 = {
+        let temperature: f64 = {
+            adjust_temperature(
+                noise[2].get([x / params.temperature_scale, y / params.temperature_scale]),
+                equator,
+                &y,
+                &params.global_heat_scaling
+            )
+        };
+
+        let altitude: f64 = {
             let w = x / params.altitude_scale;
             let z = y / params.altitude_scale;
             let x = x / (params.altitude_scale * 0.5);
             let y = y / (params.altitude_scale * 0.5);
+
             let a = noise[0].get([w, z]);
             let b = noise[0].get([w + 0.003, z + 0.002]);
             let c = noise[0].get([w + 1.2 * a, z + 1.2 * b]) +
             noise[0].get([x, y]) +
-            noise[0].get([w, z]);
+            noise[1].get([w, z]);
             c / 3.0
         };
 
         let biome = {
-            if      h >= params.peak_h                                   { Biome::Peak }
-            else if h >= params.mountain_h                               { Biome::Mountain }
-            else if h >= params.hills_h                                  { Biome::Hill }
-            else if h <= params.sea_level                                { Biome::Sea }
-            else if t <= params.frozen_t                                 { Biome::Frozen }
-            else if t <= params.tundra_t                                 { Biome::Tundra }
-            else if t <= params.boreal_t && r >= params.boreal_r         { Biome::Boreal }
-            else if r >= params.wetlands_r                               { Biome::Wetland }
-            else if t >= params.rainforest_t && r >= params.rainforest_r { Biome::Rainforest }
-            else if t <= params.temperate_t && r >= params.temperate_r   { Biome::Temperate }
-            else if t + r <= params.plains_cutoff                        { Biome::Plains }
-            else if t + r <= params.desert_cutoff                        { Biome::Desert }
-            else                                                         { Biome::Debug }
+            if      altitude >= params.peak_h                                             { Biome::Peak }
+            else if altitude >= params.mountain_h                                         { Biome::Mountain }
+            else if altitude >= params.hills_h                                            { Biome::Hill }
+            else if altitude <= params.sea_level                                          { Biome::Sea }
+            else if temperature <= params.frozen_t                                        { Biome::Frozen }
+            else if temperature <= params.tundra_t                                        { Biome::Tundra }
+            else if temperature <= params.boreal_t && rainfall >= params.boreal_r         { Biome::Boreal }
+            else if rainfall >= params.wetlands_r                                         { Biome::Wetland }
+            else if temperature >= params.rainforest_t && rainfall >= params.rainforest_r { Biome::Rainforest }
+            else if temperature <= params.temperate_t && rainfall >= params.temperate_r   { Biome::Temperate }
+            else if temperature + rainfall <= params.plains_cutoff                        { Biome::Plains }
+            else if temperature + rainfall <= params.desert_cutoff                        { Biome::Desert }
+            else                                                                          { Biome::Debug }
         };
 
         Tile {
             id,
             x,
             y,
-            altitude: h,
-            temperature: t,
-            rainfall: r,
+            altitude,
+            temperature,
+            rainfall,
             biome
         }
     }

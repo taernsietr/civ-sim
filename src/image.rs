@@ -5,7 +5,7 @@ use std::{
 };
 use chrono::Local;
 use nannou::image::{
-    save_buffer, Rgba, ColorType::Rgb8, RgbaImage, DynamicImage
+    save_buffer, Rgb, Rgba, ColorType::{Rgb8, Rgba8}, RgbaImage, DynamicImage
 };
 use crate::{
     map::{
@@ -83,15 +83,6 @@ impl World {
             (imagefile, logfile)
         };
         
-        println!("[MapGen] Writing image to file {}", &imagefile.display());
-        _ = save_buffer(
-            imagefile,
-            self.generate_image(mode).as_rgba8().unwrap(),
-            self.width as u32,
-            self.height as u32,
-            Rgb8
-        );
-
         if debug {
             let mut log = String::from("id,altitude,temperature,rainfall\n");
             for tile in &self.tiles {
@@ -100,7 +91,18 @@ impl World {
             println!("[MapGen] Writing log to file {}", &logfile.display());
             std::fs::write(logfile, log).unwrap();
         }
-        println!("[MapGen] Map saved!");
+        
+        println!("[MapGen] Writing image to file {}", &imagefile.display());
+        match save_buffer(
+            imagefile,
+            &self.generate_image(mode).to_rgba8(),
+            self.width as u32,
+            self.height as u32,
+            Rgba8
+        ) {
+            Ok(()) => { println!("[MapGen] Map saved!") },
+            e => { eprintln!("[MapGen] Could not save image to file: {:?}", e) }
+        };
     }
 }
 
